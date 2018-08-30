@@ -1,3 +1,0 @@
-0: Athaliana_TAIR10.fa
-1: Zmays_5b.fa
-2: Test_Genome.fa

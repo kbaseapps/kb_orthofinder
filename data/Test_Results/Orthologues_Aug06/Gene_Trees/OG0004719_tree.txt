@@ -1,1 +1,0 @@
-(Athaliana_TAIR10_Athaliana|_|AT5G22130.2:0.23662,Zmays_5b_Zmays|_|GRMZM2G048762_T01:0.45525,Test_Genome_Potri.001G031500.1.v3.0:0.1795);

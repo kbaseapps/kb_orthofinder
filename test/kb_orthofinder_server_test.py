@@ -94,7 +94,6 @@ class kb_orthofinderTest(unittest.TestCase):
         shutil.copy(os.path.join("/kb", "module", "data", cls.fa_filename), cls.fa_path)
 
         cls.tr_filename = 'Test_Results.tar.gz'
-        #cls.tr_path = os.path.join("/kb", "module", "data", cls.tr_filename)
         cls.tr_path = os.path.join(cls.scratch, cls.tr_filename)
         shutil.copy(os.path.join("/kb", "module", "data", cls.tr_filename), cls.tr_path)
         cls.dfu.unpack_file({'file_path' : cls.tr_path})

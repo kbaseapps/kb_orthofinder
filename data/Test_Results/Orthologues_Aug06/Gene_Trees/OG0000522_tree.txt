@@ -1,1 +1,0 @@
-(Zmays_5b_Zmays|_|GRMZM2G013201_T01:0.926,(Athaliana_TAIR10_Athaliana|_|AT1G17100.1:0.15415,Athaliana_TAIR10_Athaliana|_|AT1G78450.1:0.36109)0.948:0.22763,(Athaliana_TAIR10_Athaliana|_|AT1G78460.1:0.60683,(Test_Genome_Potri.001G067000.1.v3.0:0,Test_Genome_Potri.001G067100.1.v3.0:0)1:0.94403)0.687:0.08782);

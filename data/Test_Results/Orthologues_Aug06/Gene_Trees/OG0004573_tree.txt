@@ -1,1 +1,0 @@
-(Athaliana_TAIR10_Athaliana|_|AT5G08500.1:0.0587,Athaliana_TAIR10_Athaliana|_|AT5G23575.1:0.1184,Zmays_5b_Zmays|_|GRMZM2G437119_T02:0.26087);

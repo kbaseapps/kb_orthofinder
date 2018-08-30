@@ -1,1 +1,0 @@
-(Test_Genome:0.5,(Zmays_5b:1,Athaliana_TAIR10:1)1:0.5);
