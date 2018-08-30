@@ -1,0 +1,320 @@
+Validation step is skipped
+
+Delete old Docker containers
+ef3a1c9ee041
+
+Build Docker image
+Sending build context to Docker daemon 557.1 kB
+Sending build context to Docker daemon 1.114 MB
+Sending build context to Docker daemon 1.671 MB
+Sending build context to Docker daemon 2.228 MB
+Sending build context to Docker daemon 2.785 MB
+Sending build context to Docker daemon 3.342 MB
+Sending build context to Docker daemon 3.899 MB
+Sending build context to Docker daemon 4.226 MB
+
+Step 1/14 : FROM kbase/kbase:sdkbase2.latest
+ ---> c982660ab775
+Step 2/14 : MAINTAINER KBase Developer
+ ---> Using cache
+ ---> 133358dd80ab
+Step 3/14 : RUN apt-get update &&     DEBIAN_FRONTEND=noninteractive apt-get install -y mcl &&     apt-get install -y mafft &&     apt-get install -y fasttree
+ ---> Using cache
+ ---> 9cb8131c744c
+Step 4/14 : RUN mkdir -p /kb/deps
+ ---> Using cache
+ ---> 5d3841c8818f
+Step 5/14 : WORKDIR /kb/deps
+ ---> Using cache
+ ---> c5ad4f91c996
+Step 6/14 : RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v0.9.22/diamond-linux64.tar.gz &&     tar -zxvf diamond-linux64.tar.gz &&     mv diamond /kb/deployment/bin/diamond
+ ---> Using cache
+ ---> 3b65f240b914
+Step 7/14 : RUN wget --quiet https://github.com/davidemms/OrthoFinder/releases/download/v2.2.6/OrthoFinder-2.2.6.tar.gz &&     tar -zxf OrthoFinder-2.2.6.tar.gz &&     mv OrthoFinder-2.2.6/orthofinder /kb/deployment/bin/orthofinder
+ ---> Using cache
+ ---> a672b51664bf
+Step 8/14 : COPY ./ /kb/module
+ ---> 87fcffb53598
+Step 9/14 : RUN mkdir -p /kb/module/work
+ ---> Running in d2aef55e6f40
+Removing intermediate container d2aef55e6f40
+ ---> 7cb52da668ac
+Step 10/14 : RUN chmod -R a+rw /kb/module
+ ---> Running in ffaee52dd9e8
+Removing intermediate container ffaee52dd9e8
+ ---> 0475b2830955
+Step 11/14 : WORKDIR /kb/module
+Removing intermediate container a72df9620ec7
+ ---> 0467eeb37b34
+Step 12/14 : RUN make all
+ ---> Running in e71a7745a15a
+kb-sdk compile kb_orthofinder.spec \
+		--out lib \
+		--plclname kb_orthofinder::kb_orthofinderClient \
+		--jsclname javascript/Client \
+		--pyclname kb_orthofinder.kb_orthofinderClient \
+		--javasrc src \
+		--java \
+		--pysrvname kb_orthofinder.kb_orthofinderServer \
+		--pyimplname kb_orthofinder.kb_orthofinderImpl;
+KBase SDK version 1.0.18 (commit 77b234908144735f69085117258746ee0ecad28a)
+chmod +x scripts/entrypoint.sh
+mkdir -p bin
+echo '#!/bin/bash' > scripts/start_server.sh
+echo 'script_dir=$(dirname "$(readlink -f "$0")")' >> scripts/start_server.sh
+echo 'export KB_DEPLOYMENT_CONFIG=$script_dir/../deploy.cfg' >> scripts/start_server.sh
+echo 'export PYTHONPATH=$script_dir/../lib:$PATH:$PYTHONPATH' >> scripts/start_server.sh
+echo 'uwsgi --master --processes 5 --threads 5 --http :5000 --wsgi-file $script_dir/../lib/kb_orthofinder/kb_orthofinderServer.py' >> scripts/start_server.sh
+chmod +x scripts/start_server.sh
+mkdir -p bin
+echo '#!/bin/bash' > bin/run_kb_orthofinder_async_job.sh
+echo 'script_dir=$(dirname "$(readlink -f "$0")")' >> bin/run_kb_orthofinder_async_job.sh
+echo 'export PYTHONPATH=$script_dir/../lib:$PATH:$PYTHONPATH' >> bin/run_kb_orthofinder_async_job.sh
+echo 'python -u $script_dir/../lib/kb_orthofinder/kb_orthofinderServer.py $1 $2 $3' >> bin/run_kb_orthofinder_async_job.sh
+chmod +x bin/run_kb_orthofinder_async_job.sh
+echo '#!/bin/bash' > test/run_tests.sh
+echo 'script_dir=$(dirname "$(readlink -f "$0")")' >> test/run_tests.sh
+echo 'export KB_DEPLOYMENT_CONFIG=$script_dir/../deploy.cfg' >> test/run_tests.sh
+echo 'export KB_AUTH_TOKEN=`cat /kb/module/work/token`' >> test/run_tests.sh
+echo 'export PYTHONPATH=$script_dir/../lib:$PATH:$PYTHONPATH' >> test/run_tests.sh
+echo 'cd $script_dir/../test' >> test/run_tests.sh
+echo 'python -m nose --with-coverage --cover-package=kb_orthofinder --cover-html --cover-html-dir=/kb/module/work/test_coverage --nocapture  --nologcapture .' >> test/run_tests.sh
+chmod +x test/run_tests.sh
+Removing intermediate container e71a7745a15a
+ ---> 8451c3cd2f54
+Step 13/14 : ENTRYPOINT [ "./scripts/entrypoint.sh" ]
+ ---> Running in ab43ad952735
+Removing intermediate container ab43ad952735
+ ---> 24b93e292d99
+Step 14/14 : CMD [ ]
+ ---> Running in e365c185604c
+Removing intermediate container e365c185604c
+ ---> 445bcccce104
+Successfully built 445bcccce104
+Successfully tagged test/kb_orthofinder:latest
+Delete old Docker image
+Deleted: sha256:0314ba36938057086b71de57205e6d57cfbc1bf32ccd359fde74746df3074aa1
+Deleted: sha256:6ac79938c86d5ccdcb12c6a0b11c63ee08a085368496c980ef1142cf22a93d27
+Deleted: sha256:707a1ec9a345ed27bfcfdfcb1f7e18761e65449d3a634237dfc8e1434e0c56aa
+Deleted: sha256:af71176d5ac2f9ae6d8c4d29f909ecdeb00d6bcda011c2f8f484591019b0b146
+Deleted: sha256:91b9774061b2976c1ef7a122f1cf4d52f52a8fc6030e866fdc459e09114ff6dd
+Deleted: sha256:8639e0dc16cad16c092570f463839da61a611f8b0deba202937622a76fa6d84f
+Deleted: sha256:19ffb698c690e98bbea8569e4dc735e9b833cff2c5badabdc98b8fcd6e580fae
+Deleted: sha256:b6eff93f45fcd090f110208a64636dd5a283c8c5c9ca91b06a04be819a9338cf
+Deleted: sha256:2aaa42cadf6d8ba6fa4bd0440c9138daf1b86973540c3866d23e32557314793c
+Deleted: sha256:84b769400a871bf752bc94cabea346a4829e865fd3db0a8ad641d4602f69450a
+Deleted: sha256:57d8bfa46f56648d174b119f30900c3d2f99ae9c2763dc8ad777fd0f02f861d3
+
+Reference data initialization is skipped because it was already prepared
+Run Tests
+if [ ! -f /kb/module/work/token ]; then echo -e '\nOutside a docker container please run "kb-sdk test" rather than "make test"\n' && exit 1; fi
+bash test/run_tests.sh
+1531402679.99 - CallbackServer: Subjob method: GenomeFileUtil.fasta_gff_to_genome JobID: 5625bbd7-6c91-470e-9881-51b8cefcdb13
+1531402680.93 - CallbackServer: Running module GenomeFileUtil:
+url: https://github.com/kbaseapps/GenomeFileUtil
+commit: 0b006b61d6378b41937ea82033126c3c2b230027
+version: 0.8.8
+release: release
+
+--->
+Running GenomeFileUtil.fasta_gff_to_genome
+params:
+{
+ "gff_file": {
+  "path": "/kb/module/work/tmp/Test_v1.0.gene.gff3.gz"
+ }, 
+ "fasta_file": {
+  "path": "/kb/module/work/tmp/Test_v1.0.fa.gz"
+ }, 
+ "source": "Phytozome", 
+ "scientific_name": "Populus trichocarpa", 
+ "genome_name": "Test_Genome", 
+ "workspace_name": "test_kb_orthofinder_1531402679056", 
+ "type": "Reference"
+}
+1531402682.79: Moving file from /kb/module/work/tmp/Test_v1.0.fa.gz to /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa.gz
+1531402682.92: staged input file =/kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa.gz
+1531402682.93 - CallbackServer: Subjob method: DataFileUtil.unpack_file JobID: 798045db-ece2-465d-9571-9a91702c736b
+1531402683.26 - CallbackServer: Running module DataFileUtil:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402684.11: Shock url: https://appdev.kbase.us/services/shock-api
+1531402685.64: decompressing (with pigz) /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa.gz to /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa ...
+1531402688.28: Moving file from /kb/module/work/tmp/Test_v1.0.gene.gff3.gz to /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.gene.gff3.gz
+1531402688.29: staged input file =/kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.gene.gff3.gz
+1531402688.29 - CallbackServer: Subjob method: DataFileUtil.unpack_file JobID: dceca9dc-6434-4326-b89e-71cec7a1d1cc
+1531402688.29 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402690.02: Shock url: https://appdev.kbase.us/services/shock-api
+1531402691.53: decompressing (with pigz) /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.gene.gff3.gz to /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.gene.gff3 ...
+1531402692.46: Setting params
+1531402692.46: {
+ "taxon_reference": null, 
+ "gff_file": {
+  "path": "/kb/module/work/tmp/Test_v1.0.gene.gff3.gz"
+ }, 
+ "fasta_file": {
+  "path": "/kb/module/work/tmp/Test_v1.0.fa.gz"
+ }, 
+ "taxon_wsname": "ReferenceTaxons", 
+ "source": "Phytozome", 
+ "scientific_name": "Populus trichocarpa", 
+ "genome_name": "Test_Genome", 
+ "workspace_name": "test_kb_orthofinder_1531402679056", 
+ "metadata": {}, 
+ "type": "Reference", 
+ "release": null
+}
+1531402692.46: Reading GFF file
+1531402692.64: Adding missing identifiers
+1531402693.42 - CallbackServer: Subjob method: AssemblyUtil.save_assembly_from_fasta JobID: 0d3086e4-02a0-410b-883d-d599c5575dc9
+1531402693.75 - CallbackServer: Running module AssemblyUtil:
+url: https://github.com/kbaseapps/AssemblyUtil
+commit: 546a5e2b51e69b02b27d211773e4ac45aaf136ec
+version: 1.0.7
+release: release
+
+/usr/local/lib/python2.7/dist-packages/urllib3/util/ssl_.py:339: SNIMissingWarning: An HTTPS request has been made, but the SNI (Subject Name Indication) extension to TLS is not available on this platform. This may cause the server to present an incorrect TLS certificate, which can cause validation failures. You can upgrade to a newer version of Python to solve this. For more information, see https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
+  SNIMissingWarning
+/usr/local/lib/python2.7/dist-packages/urllib3/util/ssl_.py:137: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. You can upgrade to a newer version of Python to solve this. For more information, see https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
+  InsecurePlatformWarning
+save_assembly_from_fasta -- paramaters = 
+{u'assembly_name': u'Test_Genome.assembly',
+ u'file': {u'path': u'/kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa'},
+ u'workspace_name': u'test_kb_orthofinder_1531402679056'}
+validating parameters
+staging input files
+1531402695.41 - CallbackServer: Subjob method: DataFileUtil.unpack_file JobID: ae4d24f2-61e7-43e7-8f9c-36309e7d5923
+1531402695.41 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402696.62: Shock url: https://appdev.kbase.us/services/shock-api
+parsing FASTA file: /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa
+ - parsed 1 contigs, 11199920bp
+saving assembly to KBase
+Uploading FASTA file (/kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa) to SHOCK
+1531402702.62 - CallbackServer: Subjob method: DataFileUtil.file_to_shock JobID: 8d6ba7df-0449-48e9-82a8-035caeb816d1
+1531402702.62 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402704.43: Shock url: https://appdev.kbase.us/services/shock-api
+1531402705.93: uploading file /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.fa into shock node
+1531402718.61: uploading done into shock node: 91f4f0ca-7075-4dff-a3ae-ca9cc4e84b5f
+1531402720.76 - CallbackServer: Subjob method: DataFileUtil.ws_name_to_id JobID: 0b6338a0-3cb0-4f29-a8bb-f226d8312162
+1531402720.76 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402722.44: Shock url: https://appdev.kbase.us/services/shock-api
+Saving Assembly to Workspace
+1531402726.59 - CallbackServer: Subjob method: DataFileUtil.save_objects JobID: f7dcc0c4-fea5-4c36-b0fe-78a105b389a0
+1531402726.59 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402728.27: Shock url: https://appdev.kbase.us/services/shock-api
+1531402752.13 - CallbackServer: Subjob method: DataFileUtil.get_objects JobID: 3209d6e0-b2d1-4b10-81e2-d205849205f7
+1531402752.13 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402753.91: Shock url: https://appdev.kbase.us/services/shock-api
+1531402759.68 - CallbackServer: Subjob method: DataFileUtil.file_to_shock JobID: 49aa1d8f-c137-419b-9aad-f1b1249a76c2
+1531402759.68 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402761.31: Shock url: https://appdev.kbase.us/services/shock-api
+1531402762.86: gzipping (with pigz) /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.gene.gff3 to /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.gene.gff3.gz
+1531402762.89: uploading file /kb/module/work/tmp/fast_gff_upload_1b68254e-0339-48cd-b48c-8028284c60d4/Test_v1.0.gene.gff3.gz into shock node
+1531402766.06: uploading done into shock node: c8bdc56b-5281-4003-abdd-f3a3953f36f3
+2018-07-12 13:39:29: start saving genome object
+2018-07-12 13:39:29: start validating save_one_genome params
+2018-07-12 13:39:29: start checking handle genbank_handle_ref ownership
+2018-07-12 13:39:29: start checking handle gff_handle_ref ownership
+2018-07-12 13:39:30: start checking shock response
+2018-07-12 13:39:31: start checking dna sequence in each feature
+2018-07-12 13:39:31: Validating genome object contents
+Subobject Sizes:
+cdss: 3913254 bytes
+mrnas: 3996362 bytes
+features: 3521798 bytes
+non_coding_features: 39 bytes
+Total size 11432532 bytes
+1531402771.55 - CallbackServer: Subjob method: DataFileUtil.ws_name_to_id JobID: c1d31ee2-daec-4614-8b70-bb13252ff0d0
+1531402771.55 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402773.23: Shock url: https://appdev.kbase.us/services/shock-api
+1531402777.63 - CallbackServer: Subjob method: DataFileUtil.save_objects JobID: ca23416b-1327-4822-8b1a-b0dff59278eb
+1531402777.63 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402779.73: Shock url: https://appdev.kbase.us/services/shock-api
+1531402804.48: A genome with 1 contigs and the following feature types was imported: gene: 1028
+protein_encoding_gene: 1028
+mRNA: 1881
+CDS: 1881
+1531402812.39 - CallbackServer: Subjob method: DataFileUtil.get_objects JobID: 0c73eeb0-6391-43cf-ba9e-55ef4afbe956
+1531402812.39 - CallbackServer: WARNING: Module DataFileUtil was already used once for this job. Using cached version:
+url: https://github.com/kbaseapps/DataFileUtil
+commit: 2c2271c6e5351d1a8d2673b3b7b581c6599ec1f9
+version: 0.0.23
+release: release
+
+1531402814.22: Shock url: https://appdev.kbase.us/services/shock-api
+E
+======================================================================
+ERROR: test_your_method (kb_orthofinder_server_test.kb_orthofinderTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/kb/module/test/kb_orthofinder_server_test.py", line 117, in test_your_method
+    'threshold' : 0.5})
+  File "/kb/module/lib/kb_orthofinder/kb_orthofinderImpl.py", line 105, in annotate_plant_transcripts
+    fasta_handle = open(fasta_file_path+"/"+input['input_genome']+'.fa')
+IOError: [Errno 2] No such file or directory: '/kb/module/work/tmp/eaa82eaa-7198-4c3a-b8ee-3646ee2d5471/Test_Genome.fa'
+
+Name                                     Stmts   Miss  Cover
+------------------------------------------------------------
+kb_orthofinder/__init__.py                   0      0   100%
+kb_orthofinder/authclient.py                58     18    69%
+kb_orthofinder/kb_orthofinderImpl.py        59     14    76%
+kb_orthofinder/kb_orthofinderServer.py     369    275    25%
+------------------------------------------------------------
+TOTAL                                      486    307    37%
+Testing OrthoFinder----------------------------------------------------------------------
+Test workspace was deleted
+
+Ran 1 test in 148.632s
+
+FAILED (errors=1)
+make: *** [test] Error 1
+Shutting down callback server...
+1531402827.19 - CallbackServer: Shutting down executor service

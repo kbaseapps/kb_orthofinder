@@ -1,0 +1,58 @@
+#
+# define display information
+#
+name: Annotate Plant Enzymes with OrthoFinder
+
+tooltip: |
+    Annotating transcripts with metabolic functions using OrthoFinder
+
+screenshots: []
+
+icon: modelseed.png
+
+#
+# define a set of similar methods that might be useful to the user
+#
+suggestions:
+    apps:
+        related:
+            []
+        next:
+            []
+    methods:
+        related:
+            []
+        next:
+            []
+
+#
+# Configure the display and description of parameters
+#
+parameters :
+    input_genome :
+        ui-name : |
+            Genome 
+        short-hint : |
+            Selected genome to annotate
+        long-hint  : |
+            Selected genome to annotate with metabolic functions
+
+    output_genome :
+        ui-name : |
+            Genome 
+        short-hint : |
+            Annotated genome
+        long-hint  : |
+            The resulting genome that was annotated with metabolic functions
+
+description : |
+    
+    <p> This is the Annotation App that uses OrthoFinder to cluster transcripts with Arabidopsis enzymes curated in PlantSEED.</p>
+    
+publications :
+
+    -
+        display-text: |
+     
+           link: https://github.com/ModelSEED/PlantSEED/
+    

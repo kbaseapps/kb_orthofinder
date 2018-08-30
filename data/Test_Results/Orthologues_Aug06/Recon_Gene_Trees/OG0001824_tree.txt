@@ -1,0 +1,1 @@
+(Test_Genome_Potri.001G008500.1.v3.0:0.25173,(Zmays_5b_Zmays|_|GRMZM2G170044_T01:0.46248,(Athaliana_TAIR10_Athaliana|_|AT2G44290.1:0.08153,Athaliana_TAIR10_Athaliana|_|AT2G44300.1:0.08773)n2:0.43417)n1:0.25173)n0;
