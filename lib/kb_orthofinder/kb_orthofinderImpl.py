@@ -217,8 +217,9 @@ class kb_orthofinder:
 
         #Reference data is considered immutable but each run modifies results within the directory
         #So here, we copy the reference data directory into scratch
+        #The first if condition is for testing purposes
         family_file_path = ""
-        if(input['families_path']):
+        if('families_path' in input and os.path.isdir(input['families_path'])):
             family_file_path = input['families_path']
         else:
             uuid_string = str(uuid.uuid4())
