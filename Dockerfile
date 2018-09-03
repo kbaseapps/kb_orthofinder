@@ -12,11 +12,19 @@ RUN apt-get update && \
     apt-get install -y fasttree && \
     ln -s /usr/bin/fasttree /usr/bin/FastTree
 
+RUN which mafft && \
+    mafft --version 2>&1 | grep MAFFT && \
+    which FastTree && \
+    FastTree -expert 2>&1 | grep Detailed
+
 RUN mkdir -p /kb/deps
 WORKDIR /kb/deps
 RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v0.9.22/diamond-linux64.tar.gz && \
     tar -zxvf diamond-linux64.tar.gz && \
     mv diamond /kb/deployment/bin/diamond
+
+RUN which diamond && \
+    diamond version
 
 RUN wget --quiet https://github.com/davidemms/OrthoFinder/releases/download/v2.2.6/OrthoFinder-2.2.6_source.tar.gz && \
     tar -zxf OrthoFinder-2.2.6_source.tar.gz && \
