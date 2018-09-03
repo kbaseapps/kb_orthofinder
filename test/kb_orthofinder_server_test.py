@@ -61,9 +61,9 @@ class kb_orthofinderTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         if hasattr(cls, 'wsName'):
-#            cls.wsClient.delete_workspace({'workspace': cls.wsName})
-#            print('Test workspace was deleted')
-            print('Test workspace '+cls.wsName+' was not deleted')
+            cls.wsClient.delete_workspace({'workspace': cls.wsName})
+            print('Test workspace was deleted')
+#            print('Test workspace '+cls.wsName+' was not deleted')
 
     def getWsClient(self):
         return self.__class__.wsClient

@@ -6,6 +6,7 @@ import uuid
 import shutil
 import subprocess
 import itertools
+import time
 
 from KBaseReport.KBaseReportClient import KBaseReport
 from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
@@ -34,6 +35,10 @@ class kb_orthofinder:
     GIT_COMMIT_HASH = ""
 
     #BEGIN_CLASS_HEADER
+
+    def log(self,message, prefix_newline=False):
+        time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))
+        print(('\n' if prefix_newline else '') + time_str + ': ' + message)
 
     def compute_clusters(self, cluster):
         features = sorted(cluster.keys())
@@ -170,6 +175,7 @@ class kb_orthofinder:
         output = dict()
 
         # Retrieve plant genome
+        self.log("Fetching plant genome: "+input['input_ws']+'/'+input['input_genome'])
         plant_genome = self.dfu.get_objects({'object_refs': [input['input_ws']+'/'+input['input_genome']]})['data'][0]
 
         # Force upgrade
@@ -190,6 +196,7 @@ class kb_orthofinder:
 
         #If use_cds==1 iterate through features, iterate through CDSs, find longest sequence, use parent mRNA ID    
         #If use_cds==0 use protein_translation field if available for feature, and feature ID
+        self.log("Collecting protein sequences")
         sequences_dict=dict()
         for ftr in plant_genome['data']['features']:
             if(use_cds==0 and len(ftr['protein_translation'])>0):
@@ -218,6 +225,7 @@ class kb_orthofinder:
         #Reference data is considered immutable but each run modifies results within the directory
         #So here, we copy the reference data directory into scratch
         #The first if condition is for testing purposes
+        self.log("Copying Reference Families")
         family_file_path = ""
         if('families_path' in input and os.path.isdir(input['families_path'])):
             family_file_path = input['families_path']
@@ -227,6 +235,7 @@ class kb_orthofinder:
             shutil.copytree("/data/Reference_Results",family_file_path)
 
         #File handle
+        self.log("Printing protein sequences to file")
         with open(os.path.join(fasta_file_path,input['input_genome']+'.fa'),'w') as fasta_handle:
             #Code plagarized from https://github.com/biopython/biopython/blob/master/Bio/SeqIO/FastaIO.py
             for seq_id in sequences_dict:
@@ -240,31 +249,32 @@ class kb_orthofinder:
         command +="-S diamond -M msa -A mafft -T fasttree "
         #Threads
         command +="-t 8 -a 8 "
+        #For halting after alignments
+        command +="-oa "
         #Input genome
         command +="-f "+fasta_file_path+" "
         #Reference families
         command +="-b "+family_file_path
-
-        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True) 
-        output_string = pipe.communicate()[0] 
+        self.log("Running OrthoFinder command: "+command)
+        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) 
+        output_tuple = pipe.communicate()
         exitCode = pipe.returncode
 
-        if (exitCode != 0): 
-            error_msg = "Error running command: \n"+command+"\n"
-            error_msg +="Exit Code: "+str(exitCode)+"\n"
-            error_msg +="Output: \n"+output+"\n"
-            raise ValueError(error_msg)
-
+        OrthoFinder_output_file='OrthoFinder_Output.txt'
+        of_fh=open(os.path.join(family_file_path,OrthoFinder_output_file),'w')
         report_string = "Executed command: \n"+command+"\n"
         report_string +="Exit Code: "+str(exitCode)+"\n"
-        report_string +="Output: \n"+output_string+"\n"
-        output['report']=report_string
+        report_string +="STDOUT: \n"+output_tuple[0]+"\n"
+        report_string +="STDERR: \n"+output_tuple[1]+"\n"
+        of_fh.write(report_string)
+        of_fh.close()
 
         #Parse PlantSEED families and annotation
         PlantSEED_Curation=dict()
         Curation_File = "Arabidopsis_Family_Curation.txt"
 
         output['fns']=dict()
+        self.log("Collecting PlantSEED Curation")
         with open(os.path.join("/kb/module/data",Curation_File)) as plantseed_families_handle:
             for line in plantseed_families_handle.readlines():
                 line=line.strip()
@@ -277,6 +287,7 @@ class kb_orthofinder:
 
         #Find, read alignments, collect families
         families_dict=dict()
+        self.log("Searching for MSAs")
         for file in glob.glob(os.path.join(family_file_path,"Orthologues_*","Alignments","OG*.fa")):
             array=file.split('/')
             family=array[-1].replace(".fa","")
@@ -320,6 +331,7 @@ class kb_orthofinder:
         #Pairwise sequence identity and propagate annotation
         found_annotations_dict=dict()
         clustered_features_dict=dict()
+        self.log("Computing Sequence Identity on "+str(len(families_dict.keys()))+" Curated Alignments")
         for family in families_dict.keys():
             pw_seq_id_list = self.compute_clusters(families_dict[family])
             for spp_ftr in sorted(pw_seq_id_list.keys()):
@@ -340,6 +352,7 @@ class kb_orthofinder:
         if(use_cds==1):
             parent_feature_index = dict([(f['id'], i) for i, f in enumerate(plant_genome['data']['features'])])
 
+        self.log("Populating plant genome with newly clustered functions")
         #Add annotation to protein-coding genes
         for ftr in plant_genome['data']['features']:
             ftr['functions']=["Uncurated"]
@@ -369,13 +382,19 @@ class kb_orthofinder:
         html_string+="<p>This result indicates that, for this set of protein sequences, the app detected {0:.0f}%".format(fraction_plantseed)
         html_string+=" of the enzymatic functions of plant primary metabolism that were curated as part of the PlantSEED project.</p></body></html>"
 
-        print html_string
-
         saved_genome = "{}/{}/{}".format(save_result['info'][6],save_result['info'][0],save_result['info'][4])
         description = "Plant genome "+plant_genome['data']['id']+" annotated with metabolic functions"
+
+        output_files=list()
+        output_files.append({'path' : os.path.join(family_file_path,OrthoFinder_output_file),
+                             'name' : OrthoFinder_output_file,
+                             'label' : "OrthoFinder Output",
+                             'description' : 'Output text generated by OrthoFinder'})
+
         uuid_string = str(uuid.uuid4())
         report_params = { 'objects_created' : \
                           [{"ref":saved_genome,"description":description}],
+                          'file_links' : output_files,
                           'direct_html' : html_string,
                           'workspace_name' : input['input_ws'],
                           'report_object_name' : 'kb_plant_rast_report_' + uuid_string }
