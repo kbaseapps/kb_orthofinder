@@ -19,8 +19,12 @@ RUN which mafft && \
 
 RUN mkdir -p /kb/deps
 WORKDIR /kb/deps
-RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v0.9.22/diamond-linux64.tar.gz && \
-    tar -zxvf diamond-linux64.tar.gz && \
+# RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v0.9.22/diamond-linux64.tar.gz && \
+#    tar -zxvf diamond-linux64.tar.gz && \
+#    mv diamond /kb/deployment/bin/diamond
+
+RUN git clone https://github.com/bbuchfink/diamond && \
+    cd diamond && ./build_simple.sh && \
     mv diamond /kb/deployment/bin/diamond
 
 RUN which diamond && \
