@@ -236,7 +236,10 @@ class kb_orthofinder:
 
         #File handle
         self.log("Printing protein sequences to file")
-        with open(os.path.join(fasta_file_path,input['input_genome']+'.fa'),'w') as fasta_handle:
+        #The fasta file must have a random name to avoid _any_ clashes
+        #This will need to be replaced in the newick file
+        temp_genome_name = str(uuid.uuid4())
+        with open(os.path.join(fasta_file_path,temp_genome_name+".fa"),'w') as fasta_handle:
             #Code plagarized from https://github.com/biopython/biopython/blob/master/Bio/SeqIO/FastaIO.py
             for seq_id in sequences_dict:
                 fasta_handle.write(">"+seq_id+"\n")
@@ -312,7 +315,7 @@ class kb_orthofinder:
 
                 #skip un-necessary proteins to reduce computation time
                 spp=fasta_header.split("|_|")[0]
-                if("Athaliana" not in spp and input['input_genome'] not in spp):
+                if("Athaliana" not in spp and temp_genome_name not in spp):
                     continue
 
                 #This should've been un-necessary but here I need to remove a redundancy
@@ -339,7 +342,7 @@ class kb_orthofinder:
                                                        pw_seq_id_list[spp_ftr],
                                                        input['threshold'],
                                                        PlantSEED_Curation)
-                ftr = spp_ftr.replace(input['input_genome']+"_","")
+                ftr = spp_ftr.replace(temp_genome_name+"_","")
                 clustered_features_dict[ftr]=annotation
                 found_annotations_dict[annotation]=1
 
