@@ -258,19 +258,26 @@ class kb_orthofinder:
         command +="-f "+fasta_file_path+" "
         #Reference families
         command +="-b "+family_file_path
+
         self.log("Running OrthoFinder command: "+command)
-        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True) 
-        output_tuple = pipe.communicate()
-        exitCode = pipe.returncode
+        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 
         OrthoFinder_output_file='OrthoFinder_Output.txt'
         of_fh=open(os.path.join(family_file_path,OrthoFinder_output_file),'w')
-        report_string = "Executed command: \n"+command+"\n"
-        report_string +="Exit Code: "+str(exitCode)+"\n"
-        report_string +="STDOUT: \n"+output_tuple[0]+"\n"
-        report_string +="STDERR: \n"+output_tuple[1]+"\n"
-        of_fh.write(report_string)
+
+        while pipe.poll() is None:
+            stdout_line = pipe.stdout.readline()
+            print stdout_line.rstrip()
+            of_fh.write(stdout_line)
+        #Capture last piece of text if any
+        stdout_line=pipe.stdout.read()
+        print stdout_line.rstrip()
+        of_fh.write(stdout_line)
         of_fh.close()
+
+#        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+#        output_tuple = pipe.communicate()
+#        exitCode = pipe.returncode
 
         #Parse PlantSEED families and annotation
         PlantSEED_Curation=dict()
