@@ -22,6 +22,20 @@
             }
         },
         {
+            "id": "threshold",
+            "optional": true,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "0.55" ],
+            "field_type": "text",
+            "text_options": {
+	        "valid_ws_types": [],
+		"validate_as": "float",
+		"min_float": 0.0,
+		"max_float": 1.0
+            }
+        },
+        {
             "id": "output_genome",
             "optional": false,
             "advanced": false,

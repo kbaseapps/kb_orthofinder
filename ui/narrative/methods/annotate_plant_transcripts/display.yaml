@@ -37,6 +37,14 @@ parameters :
         long-hint  : |
             Selected genome to annotate with metabolic functions
 
+    threshold :
+        ui-name : |
+            Threshold 
+        short-hint : |
+            Selected threshold for propagating annotation
+        long-hint  : |
+            Selected threshold of sequence identity for propagating annotation
+
     output_genome :
         ui-name : |
             Genome 
