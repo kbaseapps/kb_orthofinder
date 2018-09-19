@@ -65,6 +65,10 @@
                 {
                     "input_parameter": "output_genome",
                     "target_property": "output_genome"
+                },
+                {
+                    "input_parameter": "threshold",
+                    "target_property": "threshold"
                 }
             ],
             "output_mapping": [
