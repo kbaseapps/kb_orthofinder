@@ -31,8 +31,8 @@ class kb_orthofinder:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = ""
-    GIT_COMMIT_HASH = ""
+    GIT_URL = "git@github.com:kbaseapps/kb_orthofinder.git"
+    GIT_COMMIT_HASH = "3ca54e22b7804ac0582589aa185e54fcdf0b48b1"
 
     #BEGIN_CLASS_HEADER
 
@@ -421,7 +421,6 @@ class kb_orthofinder:
                              'output is not type dict as required.')
         # return the results
         return [output]
-
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",
