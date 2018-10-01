@@ -6,7 +6,19 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
+RUN git clone https://github.com/bbuchfink/diamond && \
+    cd diamond && \
+    sed 's/g++/g++ -std=c++11/' build_simple.sh > tmp && \
+    chmod u+x tmp && \
+    mv tmp rebuild_simple.sh && \
+    ./rebuild_simple.sh && \
+    mv diamond /kb/deployment/bin/diamond
+
+RUN which diamond && \
+    diamond version
+
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y grace && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y mcl && \
     apt-get install -y mafft && \
     apt-get install -y fasttree && \
@@ -19,20 +31,14 @@ RUN which mafft && \
 
 RUN mkdir -p /kb/deps
 WORKDIR /kb/deps
-# RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v0.9.22/diamond-linux64.tar.gz && \
-#    tar -zxvf diamond-linux64.tar.gz && \
-#    mv diamond /kb/deployment/bin/diamond
-
-RUN git clone https://github.com/bbuchfink/diamond && \
-    cd diamond && ./build_simple.sh && \
-    mv diamond /kb/deployment/bin/diamond
-
-RUN which diamond && \
-    diamond version
 
 RUN wget --quiet https://github.com/davidemms/OrthoFinder/releases/download/v2.2.6/OrthoFinder-2.2.6_source.tar.gz && \
     tar -zxf OrthoFinder-2.2.6_source.tar.gz && \
     mv OrthoFinder-2.2.6_source/orthofinder /kb/deployment/bin/orthofinder
+
+RUN git clone https://github.com/pygrace/pygrace.git && \
+    cd pygrace && \
+    mv PyGrace /kb/deployment/lib/PyGrace
 
 # -----------------------------------------
 
