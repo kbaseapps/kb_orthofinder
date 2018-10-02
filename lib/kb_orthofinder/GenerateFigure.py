@@ -74,7 +74,7 @@ class GenerateFigure:
         Dataset.symbol.fill_color=1
         Dataset.symbol.size=1.0
         Dataset.symbol.linewidth=2.5
-        Dataset.legend=data_point['id']
+        Dataset.legend=data_point['id'].encode("ascii")
 
         self.grace.write_file(os.path.join(figure_path,"Annotation_Threshold_Figure.eps"))
         self.grace.write_file(os.path.join(figure_path,"Annotation_Threshold_Figure.png"))
