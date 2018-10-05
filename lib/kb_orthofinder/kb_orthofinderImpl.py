@@ -441,8 +441,12 @@ class kb_orthofinder:
         #Save index file
         with open(os.path.join(figure_path,"index.html"),'w') as index_file:
             index_file.write(html_string)
+
+        upload_info = self.dfu.file_to_shock({'file_path': figure_path,
+                                              'pack': 'zip'})
             
-        html_folder = {'path' : figure_path,
+        html_folder = {'shock_id' : upload_info['shock_id'],
+                       #'path' : figure_path,
                        'name' : 'html files',
                        'label' : 'html files',
                        'description' : 'HTML files'}
@@ -451,11 +455,11 @@ class kb_orthofinder:
         description = "Plant genome "+plant_genome['data']['id']+" annotated with metabolic functions"
 
         uuid_string = str(uuid.uuid4())
-        report_params = { 'objects_created' : \
-                          [{"ref":saved_genome,"description":description}],
+        report_params = { 'objects_created' : [{"ref":saved_genome,"description":description}],
                           'file_links' : output_files,
                           'html_links' : [html_folder],
                           'direct_html_link_index' : 0,
+#                          'direct_html' : html_string,
                           'workspace_name' : input['input_ws'],
                           'report_object_name' : 'kb_plant_rast_report_' + uuid_string }
         kbase_report_client = KBaseReport(self.callback_url, token=self.token)

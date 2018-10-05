@@ -115,6 +115,8 @@ class kb_orthofinderTest(unittest.TestCase):
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
     def test_annotate_plant_transcripts(self):
 
+#        self.dfu.shock_to_file({'handle_id':'KBH_2860058','file_path':self.scratch})
+
         #Load Fake Genome
         self.loadFakeGenome()
 
