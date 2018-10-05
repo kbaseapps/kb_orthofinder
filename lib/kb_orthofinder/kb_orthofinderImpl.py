@@ -445,9 +445,9 @@ class kb_orthofinder:
         upload_info = self.dfu.file_to_shock({'file_path': figure_path,
                                               'pack': 'zip'})
             
-        html_folder = {'shock_id' : upload_info['shock_id'],
-                       #'path' : figure_path,
-                       'name' : 'html files',
+        html_folder = {'shock_id' : upload_info['shock_id'], #Used instead of 'path'
+                       #'path' : figure_path, #KBaseReport zip_archive() is broken
+                       'name' : 'index.html', #Used for URL path
                        'label' : 'html files',
                        'description' : 'HTML files'}
 
@@ -458,8 +458,8 @@ class kb_orthofinder:
         report_params = { 'objects_created' : [{"ref":saved_genome,"description":description}],
                           'file_links' : output_files,
                           'html_links' : [html_folder],
-                          'direct_html_link_index' : 0,
-#                          'direct_html' : html_string,
+                          'direct_html_link_index' : 0, #Use to refer to index of 'html_links'
+#                          'direct_html' : html_string, # Can't embed images
                           'workspace_name' : input['input_ws'],
                           'report_object_name' : 'kb_plant_rast_report_' + uuid_string }
         kbase_report_client = KBaseReport(self.callback_url, token=self.token)
