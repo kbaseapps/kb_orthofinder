@@ -427,11 +427,14 @@ class kb_orthofinder:
         html_string+="<p>This result indicates that, for this set of protein sequences, the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
         html_string+=" of the enzymatic functions of plant primary metabolism that were curated as part of the PlantSEED project.</p>"
 
+        caption="<figcaption><b>Figure 1: </b>The fraction of enzymatic functions propagated to the species in question, at the threshold chosen by the user. "
+        caption+="This is marked by a bold plus sign.</figcaption>"
         for file in os.listdir(figure_path):
             format = file.split('.')[-1].upper()
 
             if(format == "PNG"):
-                html_string+="<p><img src=\""+file+"\"/></p></body></html>"
+#                html_string+="<p><img src=\""+file+"\"/></p></body></html>"
+                html_string+="<center><figure><img src=\""+file+"\"/>"+caption+"</figure></center>"
 
             output_files.append({'path' : os.path.join(figure_path,file),
                                  'name' : file,
