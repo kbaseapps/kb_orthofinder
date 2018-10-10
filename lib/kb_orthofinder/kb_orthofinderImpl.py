@@ -143,6 +143,7 @@ class kb_orthofinder:
                 if(ortholog not in arabidopsis_functions):
                     print family,ortholog
                     function = "Uncurated"
+                    arabidopsis_functions[ortholog]=function
                 else:
                     function = arabidopsis_functions[ortholog]
                 Multi_Functions[function]=1
