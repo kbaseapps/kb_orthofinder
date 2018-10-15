@@ -31,7 +31,7 @@ suggestions:
 parameters :
     input_genome :
         ui-name : |
-            Genome 
+            Genome
         short-hint : |
             Selected genome to annotate
         long-hint  : |
@@ -39,7 +39,7 @@ parameters :
 
     threshold :
         ui-name : |
-            Threshold 
+            Threshold
         short-hint : |
             Selected threshold for propagating annotation
         long-hint  : |
@@ -47,20 +47,28 @@ parameters :
 
     output_genome :
         ui-name : |
-            Genome 
+            Genome
         short-hint : |
             Annotated genome
         long-hint  : |
             The resulting genome that was annotated with metabolic functions
 
 description : |
-    
+
     <p> This is the Annotation App that uses OrthoFinder to cluster transcripts with Arabidopsis enzymes curated in PlantSEED.</p>
-    
+
 publications :
+    -
+        display-text: |
+            Emms DM, Kelly S. OrthoFinder: solving fundamental biases in whole genome comparisons dramatically improves orthogroup inference accuracy. Genome Biol. 2015;16. doi:10.1186/s13059-015-0721-2
+        link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4531804/
 
     -
         display-text: |
-     
-           link: https://github.com/ModelSEED/PlantSEED/
-    
+            OrthoFinder GitHub source:
+        link: https://github.com/davidemms/OrthoFinder
+
+    -
+        display-text: |
+            PlantSEED Github source:
+        link: https://github.com/ModelSEED/PlantSEED/
