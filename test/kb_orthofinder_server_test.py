@@ -127,10 +127,11 @@ class kb_orthofinderTest(unittest.TestCase):
                                                                             'input_genome' : self.genome,
                                                                             'families_path' : unpacked_tr,
                                                                             'threshold' : 0.55})
-        self.assertEqual(len(ret[0]['transcripts']),1940)
-        self.assertEqual(len(ret[0]['alignments']),1289)
+
+        self.assertEqual(ret[0]['transcripts'],1442)
+        self.assertEqual(ret[0]['alignments'],1002)
         self.assertEqual(ret[0]['ftrs'],975)
-        self.assertEqual(len(ret[0]['fns'].keys()),662)
-        self.assertEqual(ret[0]['hit_ftrs'],67)
+        self.assertEqual(ret[0]['fns'],816)
+        self.assertEqual(ret[0]['hit_ftrs'],60)
         self.assertEqual(ret[0]['hit_fns'],40)
         pass
