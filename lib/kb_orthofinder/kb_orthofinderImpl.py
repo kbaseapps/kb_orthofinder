@@ -454,6 +454,8 @@ class kb_orthofinder:
                 if(role in PlantSEED_Roles):
                     Annotated_Roles[role]=1
 
+        output['cur_roles']=len(PlantSEED_Roles.keys())
+        output['hit_roles']=len(Annotated_Roles.keys())
         fraction_plantseed = float( (float(len(Annotated_Roles.keys())) / float(len(PlantSEED_Roles.keys()))) )
         figure_params = {'threshold':input['threshold'],'fraction':fraction_plantseed,'id':input['input_genome']}
         figure_path = self.generate_figure(figure_params)
@@ -465,8 +467,12 @@ class kb_orthofinder:
         html_string+="<p>This result indicates that, for this set of protein sequences, the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
         html_string+=" of the enzymatic functions of plant primary metabolism that were curated as part of the PlantSEED project.</p>"
 
-        caption="<figcaption><b>Figure 1: </b>The fraction of enzymatic functions propagated to the species in question, at the threshold chosen by the user. "
-        caption+="This is marked by a bold plus sign.</figcaption>"
+        caption="<figcaption><b>Figure 1: </b>The PlantSEED project curated str(output['roles']) distinct enzymatic roles for Arabidopsis thaliana. "
+        caption+="Here we show the impact of propagating these enzymatic roles to other species using sequence identity. "
+        caption+="For each group of species, and for a different threshold of sequence identity, we show the fraction of curated roles that were "
+        caption+="propagated. The fraction of roles that were propagated for "+input['input_genome']+" at the chosen threshold of "
+        caption+=str(input['threshold'])+" for sequence identity is {0:.0f}%".format(float(fraction_plantseed))
+        caption+=" and is marked by the bold plus.</figcaption>"
 
         for file in os.listdir(figure_path):
             format = file.split('.')[-1].upper()
