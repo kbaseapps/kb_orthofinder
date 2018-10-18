@@ -461,18 +461,22 @@ class kb_orthofinder:
         figure_path = self.generate_figure(figure_params)
 
         html_string="<html><head><title>KBase Plant OrthoFinder Report</title></head><body>"
-        html_string+="<p>The Plant OrthoFinder app has finished running. "
-        html_string+=str(output['ftrs'])+" protein sequences were clustered with "+str(output['transcripts'])+ " PlantSEED-curated enzymes.</p>"
-        html_string+="<p>The app was able to predict "+str(output['hit_fns'])+" enzymatic functions for "+str(output['hit_ftrs'])+" protein sequences.</p>"
-        html_string+="<p>This result indicates that, for this set of protein sequences, the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
+        html_string+="<p>The Plant OrthoFinder app has finished running: "
+        html_string+=str(output['ftrs'])+" protein sequences were clustered with "+str(output['transcripts'])+ " PlantSEED-curated enzymes. "
+        html_string+="The app was able to predict "+str(output['hit_fns'])+" enzymatic functions for "+str(output['hit_ftrs'])+" protein sequences and "
+        html_string+="this result indicates that, for this set of protein sequences, the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
         html_string+=" of the enzymatic functions of plant primary metabolism that were curated as part of the PlantSEED project.</p>"
 
-        caption="<figcaption><b>Figure 1: </b>The PlantSEED project curated str(output['roles']) distinct enzymatic roles for Arabidopsis thaliana. "
-        caption+="Here we show the impact of propagating these enzymatic roles to other species using sequence identity. "
+        caption="<figcaption><b>Figure 1: </b>The PlantSEED project curated "+str(output['cur_roles'])+" distinct primary metabolic roles for Arabidopsis thaliana. "
+        caption+="Here we show the impact of propagating these roles to other species using sequence identity. "
         caption+="For each group of species, and for a different threshold of sequence identity, we show the fraction of curated roles that were "
-        caption+="propagated. The fraction of roles that were propagated for "+input['input_genome']+" at the chosen threshold of "
-        caption+=str(input['threshold'])+" for sequence identity is {0:.0f}%".format(float(fraction_plantseed))
-        caption+=" and is marked by the bold plus.</figcaption>"
+        caption+="propagated. The fraction of propagated roles decreases as a function of similarity and phylogenetic distance. "
+        caption+="The fraction of roles that were propagated for "+input['input_genome']+" at the chosen threshold of "
+        caption+=str(input['threshold'])+" for sequence identity is {0:.2f}".format(float(fraction_plantseed))
+        caption+=" and is marked by the bold plus. "
+        caption+=" A user may re-run the app with a different threshold; a higher threshold will increase the reliability of the results, but will "
+        caption+=" reduce the number of propagated metabolic roles; a lower threshold will increase the number of propagated metabolic roles but "
+        caption+=" also increase the number of propagations, increasing the likelihood of a false positive.</figcaption>"
 
         for file in os.listdir(figure_path):
             format = file.split('.')[-1].upper()
