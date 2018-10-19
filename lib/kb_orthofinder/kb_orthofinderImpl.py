@@ -467,7 +467,8 @@ class kb_orthofinder:
         html_string+="this result indicates that, for this set of protein sequences, the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
         html_string+=" of the enzymatic functions of plant primary metabolism that were curated as part of the PlantSEED project.</p>"
 
-        caption="<figcaption><b>Figure 1: </b>The PlantSEED project curated "+str(output['cur_roles'])+" distinct primary metabolic roles for Arabidopsis thaliana. "
+        caption="<figcaption><b>Figure 1: Propagation of metabolic roles for "+str(input['input_genome'])+". </b>"
+        caption+="The PlantSEED project curated "+str(output['cur_roles'])+" distinct primary metabolic roles for Arabidopsis thaliana. "
         caption+="Here we show the impact of propagating these roles to other species using sequence identity. "
         caption+="For each group of species, and for a different threshold of sequence identity, we show the fraction of curated roles that were "
         caption+="propagated. The fraction of propagated roles decreases as a function of similarity and phylogenetic distance. "
