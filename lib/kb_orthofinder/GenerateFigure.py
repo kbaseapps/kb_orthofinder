@@ -50,10 +50,12 @@ class GenerateFigure:
         Data_Colors={"Brassicaceae":2, #Red
                      "Eudicot":11, #Orange
                      "Monocot":12, #Purple
-                     "Lower":15, #Green
-                     "Algae":4} #Blue
+#                     "Lower":15, #Green
+#                     "Algae":4} #Blue
+                     "Algae":15} #Green
 
-        for key in "Brassicaceae","Eudicot","Monocot","Lower","Algae":
+#        for key in "Brassicaceae","Eudicot","Monocot","Lower","Algae":
+        for key in "Brassicaceae","Eudicot","Monocot","Algae":
             Dataset=graph.add_dataset(data[key])
             Dataset.line.color=Data_Colors[key]
             Dataset.symbol.fill_color=Data_Colors[key]

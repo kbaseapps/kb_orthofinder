@@ -1,0 +1,350 @@
+(3R)-hydroxypalmitoyl-[acyl carrier protein] dehydratase (EC 4.2.1.-)
+(E)-Cinnamoyl-CoA ligase (EC 6.2.1.-)
+2-Oxoglutarate transport
+2-dehydropantoate 2-reductase (EC 1.1.1.169)
+2-nonaprenyl-6-methoxyphenol 4-monooxygenase (EC 1.14.3.-)
+2-octaprenyl-3-methyl-6-methoxy-1,4-benzoquinol hydroxylase (EC 1.14.13.-)
+2-oxo-5-methylthiopentanoate transaminase (EC 2.6.1.-)
+3-Phosphoglycerate transport
+3-butenylglucosinolate 2-hydroxylase (no EC)
+3-deoxy-D-manno-octulosonate 8-phosphate phosphatase (EC 3.1.3.45)
+3-nonaprenyl-4-hydroxy-5-methoxybenzoate carboxy-lyase (EC 4.1.1.-)
+4-coumarate--CoA ligase 1 (EC 6.2.1.12)
+4-coumarate-CoA acyltransferase (EC 2.3.1.-)
+4-hydroxybenzoate transport
+4-hydroxybenzoyl-CoA thioesterase (EC 3.1.2.23)
+5' Deoxyadenosine transport
+5-Amino-6-(5'-phosphoribitylamino)uracil phosphatase
+5-deoxy-ribulose-1-phosphate aldolase (EC 4.1.2.-)
+5-deoxyadenosine phosphorylase (EC 2.4.2.-)
+5-deoxyribose-1-phosphate isomerase (EC 5.3.1.-)
+AMP transport
+ATP synthase alpha chain (EC 3.6.3.14)
+ATP synthase beta chain (EC 3.6.3.14)
+ATP synthase delta chain (EC 3.6.3.14)
+ATP synthase delta' chain (EC 3.6.3.14)
+ATP synthase epsilon chain (EC 3.6.3.14)
+ATP synthase gamma chain (EC 3.6.3.14)
+ATP-ADP Antiporter (TC 2.A.12)
+Acetyl-CoA transport
+Acylglycerol transacylase
+Alanine transport
+Aliphatic glucosinolate 2-oxoglutarate-dependent dioxygenase (hydroxylation) (no EC)
+Aliphatic glucosinolate 2-oxoglutarate-dependent dioxygenase (no EC)
+Ammonia transport
+Arginine transport
+Asparagine transport
+Aspartate transport
+Benzoylated glucosinolates modification, unresolved step
+Beta-phosphoglucomutase (EC 5.4.2.6)
+Bicarbonate transport
+Biotin transport
+CDP-N-methylethanolamine--1,2-diacylglycerol phosphatidyltransferase (EC 2.7.8.-)
+CDP-diacylglycerol--serine O-phosphatidyltransferase (EC 2.7.8.8)
+CYP81F4 monooxygenase
+Caffeic-o-methyltransferase (EC 2.1.1.68)
+Carbon dioxide transport
+Carbon monoxide transport
+Ceramide glucosyltransferase (EC 2.4.1.80)
+Ceramide hydroxylase
+Chloride transport
+Chlorophyll a(b) binding protein, photosystem II CP43 protein (PsbC) homolog
+Chorismate transport
+Citrate/Isocitrate antiporter
+CoA transport
+Coniferin beta-glucosidase (EC 3.2.1.126)
+Cyclopropane desaturase (no EC)
+Cystathionine gamma-synthase (EC 2.5.1.48)
+Cysteine transport
+Cytochrome b559 alpha chain (PsbE)
+Cytochrome b559 beta chain (PsbF)
+Cytochrome b6-f complex alternative Rieske iron sulfur protein PetC2
+Cytochrome b6-f complex alternative Rieske iron sulfur protein PetC3
+Cytochrome b6-f complex iron-sulfur subunit PetC1 (Rieske iron sulfur protein EC 1.10.9.1)
+Cytochrome b6-f complex subunit IV (PetD)
+Cytochrome b6-f complex subunit V (PetG)
+Cytochrome b6-f complex subunit VII (PetM)
+Cytochrome b6-f complex subunit, apocytochrome f
+Cytochrome b6-f complex subunit, cytochrome b6
+Cytochrome b6-f complex subunit, cytochrome b6, putative
+Cytochrome c oxidase polypeptide I (EC 1.9.3.1)
+Cytochrome c oxidase polypeptide II (EC 1.9.3.1)
+Cytochrome c oxidase polypeptide III (EC 1.9.3.1)
+Cytochrome c oxidase subunit 5a
+Cytochrome c oxidase subunit 5b
+Cytochrome c oxidase subunit 6a
+Cytochrome c oxidase subunit 6b
+Cytochrome c oxidase, subunit IV (EC 1.9.3.1)
+Desulfoglucosinolate sulfotransferase (EC 2.8.2.-)
+Dihydroneopterin monophosphate phosphatase (non-specific?)
+Dihydroorotate transport
+Dihydroxyacetone transport
+Dimethylallyl diphosphate transport
+Epoxide hydrolase (EC 3.3.2.-)
+Ethanolamine N-methyltransferase, free-base-specific (EC 2.1.1.-)
+Farnesyl diphosphate transport
+Fatty acid peroxygenase [fatty acid hydroperoxide-dependent] (EC 1.11.-.-)
+Fatty acid transport
+Fatty acids epoxide hydrolase (no EC)
+Ferredoxin-NADP(+) reductase (EC 1.18.1.2)
+Flavin-containing glucosinolate S-oxygenase (no EC)
+Flavonoid 3'-hydroxylase (EC 1.14.13.21)
+Formate transport
+Fumarate transport
+Galactolipid galactosyltransferase (EC 2.4.1.184)
+Galactose-1-phosphate uridylyltransferase (EC 2.7.7.10)
+Gamma-glutamyl peptidase in glucosinolates biosynthesis
+Glucokinase (EC 2.7.1.2)
+Glucose-1-phosphate guanylyltransferase (EC 2.7.7.34)
+Glucosylceramide synthase
+Glutamate transport
+Glutamate-pyruvate aminotransferase (EC 2.6.1.2)
+Glutaminase (EC 3.5.1.2)
+Glutamine transport
+Glutathione S-transferase in Trp, Phe, Tyr-derived glucosinolates biosynthesis, predicted
+Glutathione S-transferase in glucosinolates biosynthesis, predicted
+Glyceraldehyde 3-phosphate transport
+Glycerate transport
+Glycine transport
+Glycolaldehyde dehydrogenase (EC 1.2.1.21)
+Glycolate transport
+Glyoxylate transport
+HMDHP transport
+HS transport
+Histidine transport
+Homo, di, tri, tetra, penta & hexahomomethionine N-hydroxylase (EC 1.14.13.n5)
+Homo, di, tri, tetra, penta and hexahomomethionine N-hydroxylase (EC 1.14.13.n5)
+Homogalacturonan methyltransferase (EC 2.1.1.-)
+Hydrouracil transport
+Hypothetical reaction
+IMP transport
+Indole glucosinolate glucohydrolase (myrosinase)
+Indole glucosinolate methyltransferase
+Indole synthase (EC 4.1.2.8)
+Isoleucine transport
+KAPA transport
+Lauryl-[acyl-carrier protein] hydrolase (EC 3.1.2.21)
+Leucine transport
+Light transport
+Linoleoyl-CoA desaturase (EC 1.14.19.3)
+Long chain fatty acyl-CoA reductase [aldehyde-forming] (EC 1.2.1.50)
+Long-chain fatty acid omega-aldehyde dehydrogenase (EC 1.2.1.-)
+Long-chain fatty acid omega-hydroxylase (EC 1.14.13.-)
+Low-specificity L-threonine aldolase (EC 4.1.2.5)
+Lysine transport
+Malate transport
+Malonate--CoA ligase (EC 6.2.1.n3)
+Malonyl-[acyl-carrier-protein] ligase (EC 6.2.1.-)
+Mannitol dehydrogenase (EC 1.1.1.255)
+Methionine transport
+Methionine--glyoxylate aminotransferase (EC 2.6.1.73)
+Methylthioalkylmalate dehydrogenase (EC 1.1.1.-)
+Methylthioalkylmalate isomerase large subunit (EC 5.4.4.-)
+Methylthioalkylmalate isomerase small subunit (EC 5.4.4.-)
+Methylthioalkylmalate synthase (EC 2.3.3.-)
+Monooxygenase, catalyses 4-hydroxylation of indolyl-3-methyl glucosinolate (I3M) to 4OH-I3M
+N-dimethylethanolamine-phosphate cytidylyltransferase (EC 2.7.7.-)
+N-hydroxythioamide S-beta-glucosyltransferase (EC 2.4.1.195) in Trp, Phe, Tyr-derived glucosinolates biosynthesis
+N-hydroxythioamide S-beta-glucosyltransferase (EC 2.4.1.195) in aliphatic glucosinolates biosynthesis
+N-methylphosphoethanolamine cytidylyltransferase (EC 2.7.7.57)
+NADH dehydrogenase [ubiquinone] (EC 1.6.5.3) mitochondrial-encoded chain 1, ND1
+NADH dehydrogenase [ubiquinone] (EC 1.6.5.3) mitochondrial-encoded chain 2, ND2
+NADH dehydrogenase [ubiquinone] (EC 1.6.5.3) mitochondrial-encoded chain 3, ND3
+NADH dehydrogenase [ubiquinone] (EC 1.6.5.3) mitochondrial-encoded chain 4, ND4
+NADH dehydrogenase [ubiquinone] (EC 1.6.5.3) mitochondrial-encoded chain 4L, ND4L
+NADH dehydrogenase [ubiquinone] (EC 1.6.5.3) mitochondrial-encoded chain 5, ND5
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 1
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 12
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 13
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 2
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 5
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 6
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 8
+NADH dehydrogenase [ubiquinone] 1 alpha subcomplex subunit 9
+NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 10
+NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 2
+NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 3
+NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 7
+NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 8
+NADH dehydrogenase [ubiquinone] 1 beta subcomplex subunit 9
+NADH dehydrogenase [ubiquinone] flavoprotein 1 (EC 1.6.5.3) (EC 1.6.99.3)
+NADH dehydrogenase [ubiquinone] flavoprotein 2 (EC 1.6.5.3) (EC 1.6.99.3)
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 1 (EC 1.6.5.3) (EC 1.6.99.3)
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 2 (EC 1.6.5.3) (EC 1.6.99.3)
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 3 (EC 1.6.5.3) (EC 1.6.99.3)
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 4
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 5
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 6
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 7 (EC 1.6.5.3) (EC 1.6.99.3)
+NADH dehydrogenase [ubiquinone] iron-sulfur protein 8 (EC 1.6.5.3) (EC 1.6.99.3)
+NADP phosphatase (EC 3.1.3.-)
+NMN nucleosidase (EC 3.2.2.14)
+NMN phosphatase (EC 3.1.3.5)
+Nicotinate N-methyltransferase (EC 2.1.1.7)
+Nitrate transport
+Nitrite transport
+Oleoyl-[acyl carrier protein] thioesterase of FASI (EC 3.1.2.14)
+Ornithine transport
+Orotate transport
+Oxaloacetate transport
+Oxime metabolizining monooxygenase in Trp, Phe, Tyr-derived glucosinolates biosynthesis
+Oxime metabolizining monooxygenase in aliphatic glucosinolates biosynthesis
+Oxygen transport
+PLP transport
+Palmitoyl-[acyl carrier protein] thioesterase of FASI (EC 3.1.2.-)
+Penta and hexahomomethionine N-hydroxylase (EC 1.14.13.n6)
+Phenylalanine N-monooxygenase (EC 1.14.13.124)
+Phenylalanine transport
+Phosphate transport
+Phosphatidylglycerophosphatase A (EC 3.1.3.27)
+Phosphatidylglycerophosphatase B (EC 3.1.3.27)
+Phosphatidylinositol 3,5-bisphosphate phosphatase (EC 3.1.3-)
+Phosphatidylinositol-3-phosphate 5-kinase (EC 2.7.1.150)
+Phosphatidylinositol-4,5-bisphosphate 3-kinase catalytic subunit, alpha isoform (EC 2.7.1.153)
+Phosphatidylinositol-4-phosphate 3-kinase C2 domain-containing alpha polypeptide (EC 2.7.1.154)
+Phosphatidylinositol-4-phosphate 3-kinase C2 domain-containing beta polypeptide (EC 2.7.1.154)
+Phosphoenolpyruvate synthase (EC 2.7.9.2)
+Phosphoenolpyruvate transport
+Phosphoethanolamine/phosphocholine phosphatase (EC 3.1.3.75)
+Photosystem II 10 kDa phosphoprotein (PsbH)
+Photosystem II 10 kDa protein PsbR
+Photosystem II 12 kDa extrinsic protein (PsbU)
+Photosystem II 13 kDa protein Psb28 (similar to PsbW)
+Photosystem II CP22 protein PsbS
+Photosystem II CP43 protein (PsbC)
+Photosystem II CP47 protein (PsbB)
+Photosystem II manganese-stabilizing protein (PsbO)
+Photosystem II oxygen evolving complex protein PsbP
+Photosystem II oxygen evolving complex protein PsbQ
+Photosystem II protein Psb27
+Photosystem II protein PsbI
+Photosystem II protein PsbJ
+Photosystem II protein PsbK
+Photosystem II protein PsbL
+Photosystem II protein PsbM
+Photosystem II protein PsbN
+Photosystem II protein PsbTn
+Photosystem II protein PsbV, cytochrome c550
+Photosystem II protein PsbW (similar to Psb28)
+Photosystem II protein PsbX
+Photosystem II protein PsbY
+Photosystem II protein PsbZ
+Photosystem II stability/assembly factor HCF136/Ycf48
+Plastidial ATP synthase alpha chain (EC 3.6.3.14)
+Plastidial ATP synthase beta chain (EC 3.6.3.14)
+Plastidial ATP synthase delta chain
+Plastidial ATP synthase epsilon chain
+Plastidial ATP synthase gamma chain
+Plastoquinone transport
+Potassium transport
+Precorrin-2 oxidase (EC 1.3.1.76)
+Probable cytochrome c oxidase subunit 5c
+Proline transport
+Proton transport
+Purine nucleosidase (EC 3.2.2.1)
+Putative chaperon-like protein Ycf39 for quinone binding in Photosystem II
+Putative ubiquinol-cytochrome c reductase complex core protein I (subunit COR1)
+Putative ubiquinol-cytochrome c reductase complex core protein II (subunit COR2)
+Pyridoxal-5'-phosphate phosphatase (EC 3.1.3.74), eukaryotic type
+Pyridoxamine-pyruvate aminotransferase (EC 2.6.1.30)
+Pyrophosphate transport
+Pyruvate transport
+Riboflavin transport
+Ribosylnicotinamide kinase, eukaryotic (EC 2.7.1.22)
+Ribosylnicotinic acid kinase, eukaryotic (EC 2.7.1.173)
+S-Adenosyl-4-methylthio-2-oxobutanoate transport
+S-Adenosylhomocysteine transport
+S-Adenosylmethionine transport
+S-alkyl-thiohydroximate lyase (EC 4.4.1.-)
+Serine transport
+Sinapine esterase (EC 3.1.1.49)
+Sinapoylated glucosinolates modification, unresolved step
+Sinapoylglucose--choline O-sinapoyltransferase (EC 2.3.1.91)
+Sinapoylglucose--malate O-sinapoyltransferase (EC 2.3.1.92)
+Sinapoylglucose--sinapoylglucose O-sinapoyltransferase (EC 2.3.1.103)
+Solanesyl-PP transport
+Soluble pyridine nucleotide transhydrogenase (EC 1.6.1.1)
+Sphingosine N-acyltransferase (EC 2.3.1.24)
+Spontaneous Reaction
+Stearoyl-[acyl carrier protein] thioesterase of FASI (EC 3.1.2.-)
+Succinate dehydrogenase (ubiquinone) cytochrome b560 subunit SDH3/SDHC
+Succinate dehydrogenase (ubiquinone) flavoprotein subunit SDH1/SDHA (EC 1.3.5.1)
+Succinate dehydrogenase (ubiquinone) iron-sulfur subunit SDH2/SDHB (EC 1.3.5.1)
+Succinate dehydrogenase (ubiquinone) membrane anchor subunit SDH4/SDHD
+Succinate dehydrogenase (ubiquinone) plant-specific subunit SDH5
+Succinate dehydrogenase (ubiquinone) plant-specific subunit SDH6
+Succinate dehydrogenase (ubiquinone) plant-specific subunit SDH7
+Succinate dehydrogenase (ubiquinone) plant-specific subunit SDH8
+Succinate transport
+Sucrose transport
+Sulfate transport
+Thiamin monophosphate transport
+Thiamin transport
+Thiamine-monophosphate phosphatase (EC 3.1.3.-)
+Thiamine-triphosphatase (EC 3.6.1.28)
+Thiamine-triphosphatase (ThTP) synthase (EC 2.7.4.15)
+Threonine transport
+Tryptophan N-monooxygenase (EC 1.14.13.125)
+Tryptophan transport
+Tyrosine transport
+UDP-2,3-diacylglucosamine diphosphatase (EC 3.6.1.54)
+UDP-glucose--hexose-1-phosphate uridylyltransferase (EC 2.7.7.12)
+UDP-glucose:nicotinate-N-glucosyltransferase  (EC 2.4.1.196)
+UDP-glucose:pyridoxine 5'-O-beta-D-glucosyltransferase (EC 2.4.1.160)
+UDP-glucose:sinapate glucosyltransferase (EC 2.4.1.120)
+Ubiquinol--cytochrome c reductase, cytochrome B subunit (EC 1.10.2.2)
+Ubiquinol-cytochrome C reductase iron-sulfur subunit (EC 1.10.2.2)
+Ubiquinol-cytochrome c reductase complex subunit 10
+Ubiquinol-cytochrome c reductase complex subunit 6 (hinge protein)
+Ubiquinol-cytochrome c reductase complex subunit 7
+Ubiquinol-cytochrome c reductase complex subunit 8 (ubiquinone-binding protein QP-C)
+Ubiquinol-cytochrome c reductase complex subunit 9
+Ubiquinone-9 transport
+Uracil transport
+Urea transport
+V-type ATP synthase subunit A (EC 3.6.3.14)
+V-type ATP synthase subunit B (EC 3.6.3.14)
+V-type ATP synthase subunit C (EC 3.6.3.14)
+V-type ATP synthase subunit D (EC 3.6.3.14)
+V-type ATP synthase subunit E (EC 3.6.3.14)
+V-type ATP synthase subunit F (EC 3.6.3.14)
+V-type ATP synthase subunit G (EC 3.6.3.14)
+V-type ATP synthase subunit H (EC 3.6.3.14)
+V-type ATP synthase subunit I (EC 3.6.3.14)
+V-type ATP synthase subunit K (EC 3.6.3.14)
+Valine transport
+Water transport
+XXLG xyloglucan galactosyltransferase
+alternative photosystem I reaction center subunit X (PsaK2)
+beta-Fructose-6-phosphate transport
+beta-Glucose-6-phosphate transport
+cis-Aconitate transport
+glucan phosphatase (EC 3.1.3.-)
+kestotetraose hydrolase (EC 3.2.1.-)
+levan hydrolase (EC 3.2.1.-)
+pABA transport
+photosystem I 4.8K protein (PsaX)
+photosystem I P700 chlorophyll a apoprotein subunit Ia (PsaA)
+photosystem I P700 chlorophyll a apoprotein subunit Ib (PsaB)
+photosystem I assembly related protein Ycf3
+photosystem I assembly related protein Ycf37
+photosystem I assembly related protein Ycf4
+photosystem I biogenesis protein BtpA
+photosystem I iron-sulfur center subunit VII (PsaC)
+photosystem I subunit II (PsaD)
+photosystem I subunit III precursor, plastocyanin (cyt c553) docking protein (PsaF)
+photosystem I subunit IV (PsaE)
+photosystem I subunit IX (PsaJ)
+photosystem I subunit PsaG
+photosystem I subunit PsaN
+photosystem I subunit PsaO
+photosystem I subunit PsaP
+photosystem I subunit VI (PsaH)
+photosystem I subunit VIII (PsaI)
+photosystem I subunit X (PsaK, PsaK1)
+photosystem I subunit XI (PsaL)
+photosystem I subunit XII (PsaM)
+photosystem II protein D1 (PsbA)
+photosystem II protein D2 (PsbD)
+trans-cinnamate 2-monooxygenase (EC 1.14.13.14)
+ubiquinol cytochrome C oxidoreductase, cytochrome C1 subunit
