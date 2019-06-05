@@ -4,7 +4,7 @@
 name: Annotate Plant Enzymes with OrthoFinder
 
 tooltip: |
-    Annotating transcripts with metabolic functions using OrthoFinder
+    Annotates transcripts in a Genome object with metabolic functions using OrthoFinder.
 
 screenshots: []
 
@@ -23,7 +23,7 @@ suggestions:
         related:
             []
         next:
-            []
+            ["build_plant_metabolic_model"]
 
 #
 # Configure the display and description of parameters
@@ -33,17 +33,13 @@ parameters :
         ui-name : |
             Genome
         short-hint : |
-            Selected genome to annotate
-        long-hint  : |
-            Selected genome to annotate with metabolic functions
+            Select the Genome to annotate with metabolic functions.
 
     threshold :
         ui-name : |
             Threshold
         short-hint : |
-            Selected threshold for propagating annotation
-        long-hint  : |
-            Selected threshold of sequence identity for propagating annotation
+            Select the threshold of sequence identity for propagating annotation.
 
     output_genome :
         ui-name : |
@@ -51,11 +47,11 @@ parameters :
         short-hint : |
             Annotated genome
         long-hint  : |
-            The resulting genome that was annotated with metabolic functions
+            The resulting Genome that was annotated with metabolic functions using OrthoFinder.
 
 description : |
 
-    <p> This is the Annotation App that uses OrthoFinder to cluster transcripts with Arabidopsis enzymes curated in PlantSEED.</p>
+    <p>This App takes a Genome object as the input and uses OrthoFinder to cluster transcripts with Arabidopsis enzymes curated in PlantSEED. It also annotates the protein-coding genes with metabolic functions and provides the annotated Genome object as an output. Each of the Arabidopsis enzymes are used as the initial member of each cluster, and every transcript in the selected genome is placed within the same cluster if it meets two main criteria: (i) the sequence identity of the transcript-enzyme pair is higher than the other transcript-enzyme pairs and (ii) the sequence identity of the transcript-enzyme pair meets the selected threshold. More details on this selection process can be found in the publications. Once placed in a cluster, the metabolic function of the enzyme is propagated to the transcripts in the same cluster. The annotations are linked to biochemical reactions, and researchers may use the <a href=”https://narrative.kbase.us/#catalog/apps/fba_tools/build_plant_metabolic_model/beta”>Reconstruct Plant Metabolism</a> App (currently in beta) to follow up and build a working model of plant primary metabolism.</p>
 
 publications :
     -
