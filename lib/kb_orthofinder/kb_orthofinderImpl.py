@@ -34,9 +34,9 @@ class kb_orthofinder:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.1"
+    VERSION = "0.0.2"
     GIT_URL = "git@github.com:kbaseapps/kb_orthofinder.git"
-    GIT_COMMIT_HASH = "3ca54e22b7804ac0582589aa185e54fcdf0b48b1"
+    GIT_COMMIT_HASH = "4210203500471209c25c62b544dc0077da862142"
 
     #BEGIN_CLASS_HEADER
 
@@ -130,7 +130,7 @@ class kb_orthofinder:
         #Key to controlling the propagation of annotation
         #Is the sequence identity of the highest-scoring ortholog good enough?
         if(top_ortholog_seqid < threshold):
-            return "Uncurated"
+            return (None,"Uncurated",0.0)
 
         top_ortholog=""
         if(len(top_orthologs[top_ortholog_seqid])==1):
@@ -142,7 +142,6 @@ class kb_orthofinder:
             Multi_Functions = dict()
             for ortholog in (top_orthologs[top_ortholog_seqid].keys()):
                 if(ortholog not in arabidopsis_functions):
-                    print family,ortholog
                     function = "Uncurated"
                     arabidopsis_functions[ortholog]=function
                 else:
@@ -167,9 +166,9 @@ class kb_orthofinder:
                 pass
 
         if(top_ortholog in arabidopsis_functions):
-            return arabidopsis_functions[top_ortholog]
+            return (top_ortholog,arabidopsis_functions[top_ortholog],top_ortholog_seqid)
         else:
-            return "Uncurated"
+            return (None,"Uncurated",0.0)
 
     #END_CLASS_HEADER
 
@@ -185,6 +184,7 @@ class kb_orthofinder:
         self.gfu = GenomeFileUtil(self.callback_url)
         #END_CONSTRUCTOR
         pass
+
 
     def annotate_plant_transcripts(self, ctx, input):
         """
@@ -322,7 +322,7 @@ class kb_orthofinder:
 
         #Parse PlantSEED families and annotation
         PlantSEED_Curation=dict()
-        Curation_File = "Arabidopsis_Family_Curation.txt"
+        Curation_File = "Arabidopsis_Family_Curation_IMS.txt"
 
         output['fns']=dict()
         self.log("Collecting PlantSEED Curation")
@@ -330,7 +330,7 @@ class kb_orthofinder:
         with open(os.path.join("/kb/module/data",Curation_File)) as plantseed_families_handle:
             for line in plantseed_families_handle.readlines():
                 line=line.strip()
-                (transcript,curation)=line.split('\t')
+                (family,transcript,curation)=line.split('\t')
                 PlantSEED_Curation[transcript]=curation
                 output['fns'][curation]=1
          
@@ -401,13 +401,15 @@ class kb_orthofinder:
         for family in families_dict.keys():
             pw_seq_id_list = self.compute_clusters(families_dict[family])
             for spp_ftr in sorted(pw_seq_id_list.keys()):
-                annotation = self.propagate_annotation(family,
-                                                       pw_seq_id_list[spp_ftr],
-                                                       input['threshold'],
-                                                       PlantSEED_Curation)
+                (arabidopsis_ortholog,annotation,seqid) = self.propagate_annotation(family,
+                                                                              pw_seq_id_list[spp_ftr],
+                                                                              input['threshold'],
+                                                                              PlantSEED_Curation)
                 ftr = spp_ftr.replace(temp_genome_name+"_","")
                 clustered_features_dict[ftr]=annotation
-                found_annotations_dict[annotation]=1
+                if(annotation not in found_annotations_dict):
+                    found_annotations_dict[annotation]=dict()
+                found_annotations_dict[annotation][ftr]={'seqid':seqid,'ortholog':arabidopsis_ortholog}
 
         output['hit_fns']=len(found_annotations_dict.keys())
         output['hit_ftrs']=len(clustered_features_dict.keys())
@@ -442,7 +444,18 @@ class kb_orthofinder:
 
         #Calculate fraction of PlantSEED functional roles
         Annotated_Roles=dict()
+        Annotation_Table="<table><tr><th>Annotation</th><th>Feature</th><th>Ortholog</th><th>Sequence Identity</th></tr>"
         for curation in found_annotations_dict.keys():
+            print(curation,found_annotations_dict[curation])
+            for ftr in sorted(found_annotations_dict[curation].keys()):
+                ftr_hash=found_annotations_dict[curation][ftr]
+                if(ftr_hash['ortholog'] is None):
+                    continue
+
+                annotation_row="<tr><td>"+curation+"</td><td>"+ftr+"</td>"
+                annotation_row+="<td>"+ftr_hash['ortholog']+"</td><td>"+ftr_hash['seqid']+"</td></tr>"
+                Annotation_Table+=annotation_row
+
             #Split out comments
             Function_Comments = curation.split("#")
             for i in range(len(Function_Comments)):
@@ -453,12 +466,16 @@ class kb_orthofinder:
             for role in Roles:
                 if(role in PlantSEED_Roles):
                     Annotated_Roles[role]=1
+        Annotation_Table+="</table>"
 
         output['cur_roles']=len(PlantSEED_Roles.keys())
         output['hit_roles']=len(Annotated_Roles.keys())
         fraction_plantseed = float( (float(len(Annotated_Roles.keys())) / float(len(PlantSEED_Roles.keys()))) )
         figure_params = {'threshold':input['threshold'],'fraction':fraction_plantseed,'id':input['input_genome']}
         figure_path = self.generate_figure(figure_params)
+
+        with open(os.path.join(figure_path,"table.html"),'w') as table_file:
+            table_file.write(Annotation_Table)
 
         html_string="<html><head><title>KBase Plant OrthoFinder Report</title></head><body>"
         html_string+="<p>The Plant OrthoFinder app has finished running: "
@@ -514,7 +531,7 @@ class kb_orthofinder:
                           'direct_html_link_index' : 0, #Use to refer to index of 'html_links'
 #                          'direct_html' : html_string, # Can't embed images
                           'workspace_name' : input['input_ws'],
-                          'report_object_name' : 'kb_plant_rast_report_' + uuid_string }
+                          'report_object_name' : 'kb_orthofinder_' + uuid_string }
         kbase_report_client = KBaseReport(self.callback_url, token=self.token)
         report_client_output = kbase_report_client.create_extended_report(report_params)
         output['report_name']=report_client_output['name']
