@@ -6,12 +6,10 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-RUN git clone https://github.com/bbuchfink/diamond && \
-    cd diamond && \
-    sed 's/g++/g++ -std=c++11/' build_simple.sh > tmp && \
-    chmod u+x tmp && \
-    mv tmp rebuild_simple.sh && \
-    ./rebuild_simple.sh && \
+RUN apt-get update
+
+RUN wget http://github.com/bbuchfink/diamond/releases/download/v0.9.29/diamond-linux64.tar.gz && \
+    tar -zxf diamond-linux64.tar.gz diamond && \
     mv diamond /kb/deployment/bin/diamond
 
 RUN which diamond && \
