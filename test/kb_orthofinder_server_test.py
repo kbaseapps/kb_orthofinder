@@ -115,6 +115,8 @@ class kb_orthofinderTest(unittest.TestCase):
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
     def test_annotate_plant_transcripts(self):
 
+#        result = self.dfu.ws_name_to_id(self.getWsName())
+#        print("RESULT:",result)
 #        self.dfu.shock_to_file({'handle_id':'KBH_2860058','file_path':self.scratch})
 
         #Load Fake Genome
@@ -128,10 +130,11 @@ class kb_orthofinderTest(unittest.TestCase):
                                                                             'families_path' : unpacked_tr,
                                                                             'threshold' : 0.55})
 
-        self.assertEqual(ret[0]['transcripts'],1442)
-        self.assertEqual(ret[0]['alignments'],1002)
+#        print("RESULT: ",ret[0])
+        self.assertEqual(ret[0]['transcripts'],2050)
+        self.assertEqual(ret[0]['alignments'],1225)
         self.assertEqual(ret[0]['ftrs'],975)
-        self.assertEqual(ret[0]['fns'],816)
-        self.assertEqual(ret[0]['hit_ftrs'],60)
-        self.assertEqual(ret[0]['hit_fns'],40)
+        self.assertEqual(ret[0]['fns'],814)
+        self.assertEqual(ret[0]['hit_ftrs'],65)
+        self.assertEqual(ret[0]['hit_fns'],37)
         pass
