@@ -206,10 +206,6 @@ class kb_orthofinder:
         self.log("Fetching plant genome: "+input['input_ws']+'/'+input['input_genome'])
         plant_genome = self.dfu.get_objects({'object_refs': [input['input_ws']+'/'+input['input_genome']]})['data'][0]
 
-        # Force upgrade
-        if("feature_counts" in plant_genome['data']):
-            del(plant_genome['data']['feature_counts'])
-
         #Need to extract longest CDS, but only if CDSs available
         use_cds=1
         if(len(plant_genome['data']['cdss'])==0):
@@ -438,9 +434,17 @@ class kb_orthofinder:
         if('output_genome' not in input):
             input['output_genome']=input['input_genome']
 
+        #wsid = self.dfu.ws_name_to_id(input['input_ws'])
+        #save_result = self.dfu.save_objects({'id':wsid,'objects':[{'name':input['output_genome'],
+        #                                                           'data':plant_genome['data'],
+        #                                                           'type':'KBaseGenomes.Genome'}]})[0]
+        
         save_result = self.gfu.save_one_genome({'workspace' : input['input_ws'],
                                                 'name' : input['output_genome'],
-                                                'data' : plant_genome['data']});
+                                                'data' : plant_genome['data']})['info'];
+
+        #reference of saved genome
+        saved_genome = "{}/{}/{}".format(save_result[6],save_result[0],save_result[4])
 
         #Calculate fraction of PlantSEED functional roles
         Annotated_Roles=dict()
@@ -521,7 +525,6 @@ class kb_orthofinder:
                        'label' : 'html files',
                        'description' : 'HTML files'}
 
-        saved_genome = "{}/{}/{}".format(save_result['info'][6],save_result['info'][0],save_result['info'][4])
         description = "Plant genome "+plant_genome['data']['id']+" annotated with metabolic functions"
 
         uuid_string = str(uuid.uuid4())
