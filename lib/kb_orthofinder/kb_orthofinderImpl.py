@@ -225,7 +225,7 @@ class kb_orthofinder:
         for ftr in plant_genome['data']['features']:
             if(use_cds==0 and len(ftr['protein_translation'])>0):
                 sequences_dict[ftr['id']]=ftr['protein_translation']
-            if(use_cds==1):
+            if(use_cds==1 and 'cdss' in ftr):
                 longest_sequence=""
                 longest_sequence_id=""
                 for cds_id in ftr['cdss']:
