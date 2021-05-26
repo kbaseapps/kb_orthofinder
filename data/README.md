@@ -6,7 +6,13 @@ The paths listed below are notes for the app's author.
 Test Protein Families manually put together and copied from:
 /scratch/seaver/OrthoFinder/
 
-PlantSEED Arabidopsis curation:
-Arabidopsis_Family_Curation.txt
-copied from:
-/homes/seaver/Projects/OrthoFinder/PlantSEED
+Files (will link from GitHub in due course):
+1) Arabidopsis_Family_Curation.txt
+scp seq:/homes/seaver/PlantSEED_Processing/Arabidopsis_Family_Curation.txt .
+(and reduced to two columns; will switch to sorted JSON in future)
+
+2) Ignored_Roles.txt
+scp branch:/homes/seaver/Projects/PlantSEED_GitHub/Scripts/PlantSEED_v3/KBase/Ignored_Roles.txt .
+
+3) Reference_Phytozome_Threshold.txt
+scp branch:/homes/seaver/Projects/PlantSEED_GitHub/Scripts/PlantSEED_v3/KBase/Reference_Phytozome_Threshold.txt .
