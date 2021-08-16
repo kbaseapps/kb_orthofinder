@@ -11,12 +11,15 @@ from jsonrpcbase import JSONRPCService, InvalidParamsError, KeywordError,\
     JSONRPCError, InvalidRequestError
 from jsonrpcbase import ServerError as JSONServerError
 from os import environ
-from ConfigParser import ConfigParser
 from biokbase import log
 import requests as _requests
 import random as _random
 import os
 from kb_orthofinder.authclient import KBaseAuth as _KBaseAuth
+try:
+    from ConfigParser import ConfigParser  # py2
+except:
+    from configparser import ConfigParser  # py3
 
 DEPLOY = 'KB_DEPLOYMENT_CONFIG'
 SERVICE = 'KB_SERVICE_NAME'
