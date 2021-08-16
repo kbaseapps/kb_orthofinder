@@ -1,4 +1,4 @@
-FROM kbase/kbase:sdkbase2.latest
+FROM kbase/sdkbase2:python
 MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
@@ -6,35 +6,35 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-RUN apt-get update
+RUN apt-get update && apt-get install -y wget
 
-RUN wget http://github.com/bbuchfink/diamond/releases/download/v0.9.29/diamond-linux64.tar.gz && \
+RUN pip install --upgrade pip && \
+    pip install scipy
+
+RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v2.0.9/diamond-linux64.tar.gz && \
     tar -zxf diamond-linux64.tar.gz diamond && \
-    mv diamond /kb/deployment/bin/diamond
-
-RUN which diamond && \
+    mv diamond /usr/bin/diamond && \
     diamond version
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y grace && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y mcl && \
-    apt-get install -y mafft && \
-    apt-get install -y fasttree && \
-    ln -s /usr/bin/fasttree /usr/bin/FastTree
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y grace && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y mcl
 
-RUN which mafft && \
-    mafft --version 2>&1 | grep MAFFT && \
-    which FastTree && \
-    FastTree -expert 2>&1 | grep Detailed
+RUN apt-get install -y mafft && \
+    mafft --version
+    
+RUN apt-get install -y fasttree && \
+    ln -s /usr/bin/fasttree /usr/bin/FastTree && \
+    FastTree -expert
 
 RUN mkdir -p /kb/deps
 WORKDIR /kb/deps
 
-RUN wget --quiet https://github.com/davidemms/OrthoFinder/releases/download/v2.2.6/OrthoFinder-2.2.6_source.tar.gz && \
-    tar -zxf OrthoFinder-2.2.6_source.tar.gz && \
-    mv OrthoFinder-2.2.6_source/orthofinder /kb/deployment/bin/orthofinder
+RUN wget --quiet https://github.com/davidemms/OrthoFinder/releases/download/2.5.2/OrthoFinder_source.tar.gz && \
+    tar -zxf OrthoFinder_source.tar.gz && \
+    mv OrthoFinder_source /kb/deployment/bin/orthofinder
 
-RUN git clone https://github.com/pygrace/pygrace.git && \
+# Using a fork with fixes for Python 3
+RUN git clone https://github.com/samseaver/pygrace.git && \
     cd pygrace && \
     mv PyGrace /kb/deployment/lib/PyGrace
 
