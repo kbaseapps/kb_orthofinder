@@ -49,13 +49,11 @@ class GenerateFigure:
 
         Data_Colors={"Brassicaceae":2, #Red
                      "Eudicot":11, #Orange
-                     "Monocot":12, #Purple
-#                     "Lower":15, #Green
-#                     "Algae":4} #Blue
-                     "Algae":15} #Green
+                     "Liliopsida":12, #Purple
+                     "Embryophyta":15, #Green
+                     "Chlorophyta":4} #Blue
 
-#        for key in "Brassicaceae","Eudicot","Monocot","Lower","Algae":
-        for key in "Brassicaceae","Eudicot","Monocot","Algae":
+        for key in "Brassicaceae","Eudicot","Liliopsida","Embryophyta","Chlorophyta":
             Dataset=graph.add_dataset(data[key])
             Dataset.line.color=Data_Colors[key]
             Dataset.symbol.fill_color=Data_Colors[key]
@@ -76,7 +74,7 @@ class GenerateFigure:
         Dataset.symbol.fill_color=1
         Dataset.symbol.size=1.0
         Dataset.symbol.linewidth=2.5
-        Dataset.legend=data_point['id'].encode("ascii")
+        Dataset.legend=data_point['id'].encode("ascii").decode("ascii")
 
         self.grace.write_file(os.path.join(figure_path,"Annotation_Threshold_Figure.eps"))
         self.grace.write_file(os.path.join(figure_path,"Annotation_Threshold_Figure.png"))
