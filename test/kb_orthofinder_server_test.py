@@ -14,13 +14,12 @@ except:
 
 from pprint import pprint  # noqa: F401
 
-from biokbase.workspace.client import Workspace as workspaceService
-from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
-from DataFileUtil.DataFileUtilClient import DataFileUtil
+from installed_clients.WorkspaceClient import Workspace as workspaceService
+from installed_clients.GenomeFileUtilClient import GenomeFileUtil
+from installed_clients.DataFileUtilClient import DataFileUtil
 from kb_orthofinder.kb_orthofinderImpl import kb_orthofinder
 from kb_orthofinder.kb_orthofinderServer import MethodContext
 from kb_orthofinder.authclient import KBaseAuth as _KBaseAuth
-
 
 class kb_orthofinderTest(unittest.TestCase):
 
@@ -44,7 +43,7 @@ class kb_orthofinderTest(unittest.TestCase):
                         'user_id': user_id,
                         'provenance': [
                             {'service': 'kb_orthofinder',
-                             'method': 'please_never_use_it_in_production',
+                             'method': 'annotate_plant_transcripts',
                              'method_params': []
                              }],
                         'authenticated': 1})
@@ -52,6 +51,7 @@ class kb_orthofinderTest(unittest.TestCase):
         cls.wsClient = workspaceService(cls.wsURL)
         cls.serviceImpl = kb_orthofinder(cls.cfg)
         cls.scratch = cls.cfg['scratch']
+        cls.test_data = cls.cfg['test_data']
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
         cls.gfu = GenomeFileUtil(cls.callback_url)
         cls.dfu = DataFileUtil(cls.callback_url)
@@ -93,10 +93,11 @@ class kb_orthofinderTest(unittest.TestCase):
         cls.fa_path = os.path.join(cls.scratch, cls.fa_filename)
         shutil.copy(os.path.join("/kb", "module", "data", cls.fa_filename), cls.fa_path)
 
-        cls.tr_filename = 'Test_Results.tar.gz'
-        cls.tr_path = os.path.join(cls.scratch, cls.tr_filename)
-        shutil.copy(os.path.join("/kb", "module", "data", cls.tr_filename), cls.tr_path)
-        cls.dfu.unpack_file({'file_path' : cls.tr_path})
+        cls.tr_filename = cls.test_data+'.tar.gz'
+        cls.tr_path = os.path.join("/kb", "module", "data", cls.tr_filename)
+        # cls.tr_path = os.path.join(cls.scratch, cls.tr_filename)
+        # This is now copied and unarchived in scripts/entrypoint.sh
+        # shutil.copy(os.path.join("/kb", "module", "data", cls.tr_filename), cls.tr_path)
 
     def loadFakeGenome(cls):
         
@@ -115,13 +116,12 @@ class kb_orthofinderTest(unittest.TestCase):
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
     def test_annotate_plant_transcripts(self):
 
-#        result = self.dfu.ws_name_to_id(self.getWsName())
-#        print("RESULT:",result)
-#        self.dfu.shock_to_file({'handle_id':'KBH_2860058','file_path':self.scratch})
-
-        #Load Fake Genome
+        # Load Fake Genome
         self.loadFakeGenome()
 
+        # DFU hangs on the large archive so we changed it so it's done
+        # during test initialization in scripts/entrypoint.sh
+        # self.dfu.unpack_file({'file_path' : self.tr_path})
         unpacked_tr = self.tr_path.replace('.tar.gz','')
 
         # Running Plant RAST
@@ -130,11 +130,11 @@ class kb_orthofinderTest(unittest.TestCase):
                                                                             'families_path' : unpacked_tr,
                                                                             'threshold' : 0.55})
 
-#        print("RESULT: ",ret[0])
-        self.assertEqual(ret[0]['transcripts'],2050)
-        self.assertEqual(ret[0]['alignments'],1225)
+        print("RESULT: ",ret[0])
+        self.assertEqual(ret[0]['transcripts'],2030)
+        self.assertEqual(ret[0]['alignments'],1754)
         self.assertEqual(ret[0]['ftrs'],975)
-        self.assertEqual(ret[0]['fns'],814)
-        self.assertEqual(ret[0]['hit_ftrs'],65)
-        self.assertEqual(ret[0]['hit_fns'],37)
+        self.assertEqual(ret[0]['fns'],816)
+        self.assertEqual(ret[0]['hit_ftrs'],73)
+        self.assertEqual(ret[0]['hit_fns'],39)
         pass

@@ -10,10 +10,10 @@ import subprocess
 import itertools
 import time
 
-from KBaseReport.KBaseReportClient import KBaseReport
-from GenomeFileUtil.GenomeFileUtilClient import GenomeFileUtil
-from DataFileUtil.DataFileUtilClient import DataFileUtil
-from Workspace.WorkspaceClient import Workspace as workspaceService
+from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.GenomeFileUtilClient import GenomeFileUtil
+from installed_clients.DataFileUtilClient import DataFileUtil
+from installed_clients.WorkspaceClient import Workspace as workspaceService
 from kb_orthofinder.GenerateFigure import GenerateFigure
 
 #END_HEADER
@@ -75,8 +75,8 @@ class kb_orthofinder:
                 if(i>=j):
                     continue
 
-                Spp1=features[i].split("|_|")[0]
-                Spp2=features[j].split("|_|")[0]
+                Spp1=features[i].split("||")[0]
+                Spp2=features[j].split("||")[0]
                 if(Spp1 == features[i]):
                     Spp1 = "_".join(features[i].split("_")[0:-1])
                 if(Spp2 == features[j]):
@@ -122,19 +122,19 @@ class kb_orthofinder:
                 top_orthologs[cluster[ortholog]]=dict()
             top_orthologs[cluster[ortholog]][ortholog]=1
 
-        top_ortholog_seqid=0.0
+        top_ortholog_seqid="0.00"
         for seq_id in (top_orthologs.keys()):
-            if(seq_id>top_ortholog_seqid):
+            if(float(seq_id)>float(top_ortholog_seqid)):
                 top_ortholog_seqid=seq_id
 
         #Key to controlling the propagation of annotation
         #Is the sequence identity of the highest-scoring ortholog good enough?
-        if(top_ortholog_seqid < threshold):
+        if(float(top_ortholog_seqid) < threshold):
             return (None,"Uncurated",0.0)
 
         top_ortholog=""
         if(len(top_orthologs[top_ortholog_seqid])==1):
-            top_ortholog = top_orthologs[top_ortholog_seqid].keys()[0]
+            top_ortholog = list(top_orthologs[top_ortholog_seqid].keys())[0]
         else:
             #There are multiple Arabidopsis orthologs that have the same level of seq. id
             #Collect the actual functions and see if there's multiple functions
@@ -154,7 +154,7 @@ class kb_orthofinder:
             # 2) if 2 functions, and none is "Uncurated" or > 2 functions, make it ambiguous
 
             if(len(Multi_Functions.keys())==1):
-                top_ortholog = top_orthologs[top_ortholog_seqid].keys()[0]
+                top_ortholog = list(top_orthologs[top_ortholog_seqid].keys())[0]
             elif(len(Multi_Functions.keys())==2 and "Uncurated" in Multi_Functions.keys()):
                 for ortholog in (top_orthologs[top_ortholog_seqid].keys()):
                     if(arabidopsis_functions[ortholog] == "Uncurated"):
@@ -249,21 +249,26 @@ class kb_orthofinder:
         #Reference data is considered immutable but each run modifies results within the directory
         #So here, we copy the reference data directory into scratch
         #The first if condition is for testing purposes
-        self.log("Copying Reference Families")
         family_file_path = ""
+        testing = False
+        print("Fucking families_path: "+input['families_path'])
         if('families_path' in input and os.path.isdir(input['families_path'])):
+            testing = True
             family_file_path = input['families_path']
+            self.log("Testing Reference Families at "+family_file_path)
         else:
             uuid_string = str(uuid.uuid4())
             family_file_path=os.path.join(self.scratch,uuid_string,"Reference_Results")
+            self.log("Copying Reference Families to "+family_file_path)
             shutil.copytree("/data/Reference_Results",family_file_path)
 
-        #File handle
-        self.log("Printing protein sequences to file")
         #The fasta file must have a random name to avoid _any_ clashes
         #This will need to be replaced in the newick file
         temp_genome_name = str(uuid.uuid4())
-        with open(os.path.join(fasta_file_path,temp_genome_name+".fa"),'w') as fasta_handle:
+        protein_fasta_file = os.path.join(fasta_file_path,temp_genome_name+".fa")
+        self.log("Printing protein sequences to file: "+protein_fasta_file)
+
+        with open(protein_fasta_file,'w') as fasta_handle:
             #Code plagarized from https://github.com/biopython/biopython/blob/master/Bio/SeqIO/FastaIO.py
             for seq_id in sequences_dict:
                 fasta_handle.write(">"+seq_id+"\n")
@@ -274,8 +279,10 @@ class kb_orthofinder:
         command = "/kb/deployment/bin/orthofinder/orthofinder.py "
         #Software
         command +="-S diamond -M msa -A mafft -T fasttree "
-        #Threads
+        # No. of Threads
         command +="-t 8 -a 8 "
+        # Avoid adding Species ID to Sequence IDs
+        command += "-X "
         #For halting after alignments
         command +="-oa "
         #Input genome
@@ -283,31 +290,31 @@ class kb_orthofinder:
         #Reference families
         command +="-b "+family_file_path
 
-        self.log("Running OrthoFinder command: "+command)
-        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-
-        OrthoFinder_output_file='OrthoFinder_Output.txt'
-        of_fh=open(os.path.join(family_file_path,OrthoFinder_output_file),'w')
-
-        while pipe.poll() is None:
-            stdout_line = pipe.stdout.readline()
-            print stdout_line.rstrip()
-            of_fh.write(stdout_line)
-        #Capture last piece of text if any
-        stdout_line=pipe.stdout.read()
-        print stdout_line.rstrip()
-        of_fh.write(stdout_line)
-        of_fh.close()
-
-#        pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-#        output_tuple = pipe.communicate()
-#        exitCode = pipe.returncode
-
+        #####################################################
         output_files=list()
-        output_files.append({'path' : os.path.join(family_file_path,OrthoFinder_output_file),
-                             'name' : OrthoFinder_output_file,
-                             'label' : "OrthoFinder Output",
-                             'description' : 'Output text generated by OrthoFinder'})
+        if(testing is False):
+            self.log("Running OrthoFinder command (not): "+command)
+            return([])
+
+            pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+
+            OrthoFinder_output_file='OrthoFinder_Output.txt'
+            of_fh=open(os.path.join(family_file_path,OrthoFinder_output_file),'wb')
+
+            while pipe.poll() is None:
+                stdout_line = pipe.stdout.readline()
+                print(stdout_line.rstrip(), flush=True)
+                of_fh.write(stdout_line)
+            # Capture last piece of text if any
+            stdout_line=pipe.stdout.read()
+            print(stdout_line.rstrip(),flush=True)
+            of_fh.write(stdout_line)
+            of_fh.close()
+
+            output_files.append({'path' : os.path.join(family_file_path,OrthoFinder_output_file),
+                                 'name' : OrthoFinder_output_file,
+                                 'label' : "OrthoFinder Output",
+                                 'description' : 'Output text generated by OrthoFinder'})
 
         Ignored_Curation=dict()
         Ignored_File = "Ignored_Roles.txt"
@@ -318,7 +325,7 @@ class kb_orthofinder:
 
         #Parse PlantSEED families and annotation
         PlantSEED_Curation=dict()
-        Curation_File = "Arabidopsis_Family_Curation_IMS.txt"
+        Curation_File = "Arabidopsis_Family_Curation.txt"
 
         output['fns']=dict()
         self.log("Collecting PlantSEED Curation")
@@ -347,8 +354,9 @@ class kb_orthofinder:
 
         #Find, read alignments, collect families
         families_dict=dict()
-        self.log("Searching for MSAs")
-        for file in glob.glob(os.path.join(family_file_path,"Orthologues_*","Alignments","OG*.fa")):
+        search_path = os.path.join(family_file_path,"OrthoFinder","Results_*","MultipleSequenceAlignments","OG*.fa")
+        self.log("Searching for MSAs in "+search_path)
+        for file in glob.glob(search_path):
             array=file.split('/')
             family=array[-1].replace(".fa","")
             alignment_handle = open(file,'rU')
@@ -359,9 +367,9 @@ class kb_orthofinder:
             faiter = (x[1] for x in itertools.groupby(alignment_handle, lambda line: line[0] == ">"))
             for header in faiter:
                 # drop the ">"
-                header = header.next()[1:].strip()
+                header = header.__next__()[1:].strip()
                 # join all sequence lines to one.
-                seq = "".join(s.strip() for s in faiter.next())
+                seq = "".join(s.strip() for s in faiter.__next__())
 
                 fasta_header=""
                 try:
@@ -371,13 +379,9 @@ class kb_orthofinder:
                     fasta_description = None
 
                 #skip un-necessary proteins to reduce computation time
-                spp=fasta_header.split("|_|")[0]
-                if("Athaliana" not in spp and temp_genome_name not in spp):
+                if("Athaliana" not in fasta_header and fasta_header not in sequences_dict):
                     continue
 
-                #This should've been un-necessary but here I need to remove a redundancy
-                fasta_header = fasta_header.replace("Athaliana_TAIR10_Athaliana","Athaliana")
-                
                 seq = seq.upper()
                 family_sequences_dict[fasta_header]=seq
                 if(fasta_header in PlantSEED_Curation):
@@ -398,9 +402,9 @@ class kb_orthofinder:
             pw_seq_id_list = self.compute_clusters(families_dict[family])
             for spp_ftr in sorted(pw_seq_id_list.keys()):
                 (arabidopsis_ortholog,annotation,seqid) = self.propagate_annotation(family,
-                                                                              pw_seq_id_list[spp_ftr],
-                                                                              input['threshold'],
-                                                                              PlantSEED_Curation)
+                                                                                    pw_seq_id_list[spp_ftr],
+                                                                                    input['threshold'],
+                                                                                    PlantSEED_Curation)
                 ftr = spp_ftr.replace(temp_genome_name+"_","")
                 clustered_features_dict[ftr]=annotation
                 if(annotation not in found_annotations_dict):
