@@ -37,8 +37,9 @@ elif [ "${1}" = "init" ] ; then
   cd /data
   PROTEIN_FAMILY_FILE="OrthoFinder_Phytozome_Reference.tar.gz"
   wget http://bioseed.mcs.anl.gov/~seaver/Files/PlantSEED/${PROTEIN_FAMILY_FILE}
+  echo "Gunzipping file"
   tar -zxf $PROTEIN_FAMILY_FILE
-  if [ -f Reference_Results/SpeciesIDs.txt ] ; then
+  if [ -f OrthoFinder_Phytozome_Reference/SpeciesIDs.txt ] ; then
       touch __READY__
       echo "Init succeeded"
   else
