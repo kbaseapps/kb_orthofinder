@@ -267,7 +267,7 @@ class kb_orthofinder:
             uuid_string = str(uuid.uuid4())
             family_file_path=os.path.join(self.scratch,uuid_string,"Reference_Results")
             self.log("Copying Reference Families to "+family_file_path)
-            shutil.copytree("/data/Reference_Results",family_file_path)
+            shutil.copytree("/data/OrthoFinder_Phytozome_Reference",family_file_path)
 
         #The fasta file must have a random name to avoid _any_ clashes
         #This will need to be replaced in the newick file
