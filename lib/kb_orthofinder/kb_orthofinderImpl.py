@@ -14,7 +14,15 @@ from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.GenomeFileUtilClient import GenomeFileUtil
 from installed_clients.DataFileUtilClient import DataFileUtil
 from installed_clients.WorkspaceClient import Workspace as workspaceService
+
+from kb_orthofinder.core.generate_table_impl import GenerateTableImpl
+from kb_orthofinder.core.generate_figure_impl import GenerateFigureImpl
 from kb_orthofinder.GenerateFigure import GenerateFigure
+
+from bokeh.plotting import output_file, save
+
+PS_url = 'https://raw.githubusercontent.com/ModelSEED/PlantSEED/'
+PS_tag = 'kbase_release'
 
 #END_HEADER
 
@@ -114,7 +122,7 @@ class kb_orthofinder:
 
         return clustered_sequences
 
-    def propagate_annotation(self, family, cluster, threshold, arabidopsis_functions):
+    def propagate_annotation(self, cluster, threshold, arabidopsis_functions):
         top_orthologs = dict()
         for ortholog in (cluster.keys()):
             
@@ -251,7 +259,6 @@ class kb_orthofinder:
         #The first if condition is for testing purposes
         family_file_path = ""
         testing = False
-        print("Fucking families_path: "+input['families_path'])
         if('families_path' in input and os.path.isdir(input['families_path'])):
             testing = True
             family_file_path = input['families_path']
@@ -362,7 +369,7 @@ class kb_orthofinder:
             alignment_handle = open(file,'rU')
 
             family_sequences_dict=dict()
-            curated_family=0
+            curated_family=list()
             # alternate header and sequence
             faiter = (x[1] for x in itertools.groupby(alignment_handle, lambda line: line[0] == ">"))
             for header in faiter:
@@ -385,33 +392,55 @@ class kb_orthofinder:
                 seq = seq.upper()
                 family_sequences_dict[fasta_header]=seq
                 if(fasta_header in PlantSEED_Curation):
-                    curated_family=1
+                    function = PlantSEED_Curation[fasta_header]
+                    curated_family.append(function+"|||"+fasta_header)
                     output['alignments'].append(fasta_header)
             
-            if(curated_family==1):
-                families_dict[family]=family_sequences_dict
+            if(len(curated_family)>0):
+                if(family not in families_dict):
+                    families_dict[family]=dict()
+                families_dict[family]['sequences']=family_sequences_dict
+                families_dict[family]['functions']=curated_family
 
         output['alignments']=len(output['alignments'])
 
         #Iterate through collected families and compute
         #Pairwise sequence identity and propagate annotation
-        found_annotations_dict=dict()
+        functions_dict=dict()
+        found_annotations=list()
         clustered_features_dict=dict()
         self.log("Computing Sequence Identity on "+str(len(families_dict.keys()))+" Curated Alignments")
         for family in families_dict.keys():
-            pw_seq_id_list = self.compute_clusters(families_dict[family])
-            for spp_ftr in sorted(pw_seq_id_list.keys()):
-                (arabidopsis_ortholog,annotation,seqid) = self.propagate_annotation(family,
-                                                                                    pw_seq_id_list[spp_ftr],
-                                                                                    input['threshold'],
-                                                                                    PlantSEED_Curation)
-                ftr = spp_ftr.replace(temp_genome_name+"_","")
-                clustered_features_dict[ftr]=annotation
-                if(annotation not in found_annotations_dict):
-                    found_annotations_dict[annotation]=dict()
-                found_annotations_dict[annotation][ftr]={'seqid':seqid,'ortholog':arabidopsis_ortholog}
 
-        output['hit_fns']=len(found_annotations_dict.keys())
+            pw_seq_id_list = self.compute_clusters(families_dict[family]['sequences'])
+
+            for function_ortholog in families_dict[family]['functions']:
+                (function,ortholog) = function_ortholog.split("|||")
+                if(function not in functions_dict):
+                    functions_dict[function]=dict()
+                if(family not in functions_dict[function]):
+                    functions_dict[function][family]={'orthologs':[],
+                                                      'hits':[],
+                                                      'cluster':pw_seq_id_list}
+
+                if(ortholog not in functions_dict[function][family]['orthologs']):
+                    functions_dict[function][family]['orthologs'].append(ortholog)
+
+            for spp_ftr in sorted(pw_seq_id_list.keys()):
+                (ortholog,function,seqid) = self.propagate_annotation(pw_seq_id_list[spp_ftr],
+                                                                      input['threshold'],
+                                                                      PlantSEED_Curation)
+                ftr = spp_ftr.replace(temp_genome_name+"_","")
+                clustered_features_dict[ftr]=function
+                if(function not in found_annotations):
+                    found_annotations.append(function)
+
+                if(function in functions_dict and \
+                       family in functions_dict[function] and \
+                       ortholog in functions_dict[function][family]['orthologs']):
+                    functions_dict[function][family]['hits'].append({'seqid':seqid,
+                                                                     'feature':spp_ftr})
+        output['hit_fns']=len(found_annotations)
         output['hit_ftrs']=len(clustered_features_dict.keys())
 
         #Now, re-populate feature functions, and save genome object
@@ -451,20 +480,39 @@ class kb_orthofinder:
         saved_genome = "{}/{}/{}".format(save_result[6],save_result[0],save_result[4])
 
         #Calculate fraction of PlantSEED functional roles
+        table_generator = GenerateTableImpl()
+        Annotation_Table = table_generator.generate_table(functions_dict)
+
+        # with open("/kb/module/work/tmp/shit.json","w") as fh:
+        #    import json
+        #    json.dump(functions_dict, fh)
+        #    fh.close()
+
+        # for curation in functions_dict.keys():
+        #    print(curation,functions_dict[curation])
+        #    for ftr in sorted(functions_dict[curation].keys()):
+        #        ftr_hash=functions_dict[curation][ftr]
+        #        if(ftr_hash['ortholog'] is None):
+        #            continue
+        #
+        #        annotation_row="<tr><td>"+curation+"</td><td>"+ftr+"</td>"
+        #        annotation_row+="<td>"+ftr_hash['ortholog']+"</td><td>"+ftr_hash['seqid']+"</td></tr>"
+        #        Annotation_Table+=annotation_row
+        #
+        #    #Split out comments
+        #    Function_Comments = curation.split("#")
+        #    for i in range(len(Function_Comments)):
+        #        Function_Comments[i]=Function_Comments[i].strip()
+        # 
+        #    Function = Function_Comments.pop(0)
+        #    Roles = re.split("\s*;\s+|\s+[\@\/]\s+", Function)
+        #    for role in Roles:
+        #        if(role in PlantSEED_Roles):
+        #            Annotated_Roles[role]=1
+        # Annotation_Table+="</table>"
+
         Annotated_Roles=dict()
-        Annotation_Table="<table><tr><th>Annotation</th><th>Feature</th><th>Ortholog</th><th>Sequence Identity</th></tr>"
-        for curation in found_annotations_dict.keys():
-            print(curation,found_annotations_dict[curation])
-            for ftr in sorted(found_annotations_dict[curation].keys()):
-                ftr_hash=found_annotations_dict[curation][ftr]
-                if(ftr_hash['ortholog'] is None):
-                    continue
-
-                annotation_row="<tr><td>"+curation+"</td><td>"+ftr+"</td>"
-                annotation_row+="<td>"+ftr_hash['ortholog']+"</td><td>"+ftr_hash['seqid']+"</td></tr>"
-                Annotation_Table+=annotation_row
-
-            #Split out comments
+        for curation in found_annotations:
             Function_Comments = curation.split("#")
             for i in range(len(Function_Comments)):
                 Function_Comments[i]=Function_Comments[i].strip()
@@ -474,13 +522,25 @@ class kb_orthofinder:
             for role in Roles:
                 if(role in PlantSEED_Roles):
                     Annotated_Roles[role]=1
-        Annotation_Table+="</table>"
 
+        output['hit_fns']=len(found_annotations)
         output['cur_roles']=len(PlantSEED_Roles.keys())
         output['hit_roles']=len(Annotated_Roles.keys())
         fraction_plantseed = float( (float(len(Annotated_Roles.keys())) / float(len(PlantSEED_Roles.keys()))) )
         figure_params = {'threshold':input['threshold'],'fraction':fraction_plantseed,'id':input['input_genome']}
         figure_path = self.generate_figure(figure_params)
+        
+        figure_generator = GenerateFigureImpl("/kb/module/data/")
+        bokeh_figure = figure_generator.generate_figure(input['threshold'],
+                                                        fraction_plantseed)
+        # Figure Path
+        uuid_string = str(uuid.uuid4())
+        figure_data_file_path=os.path.join(self.scratch,uuid_string)
+        os.mkdir(figure_data_file_path)
+
+        # Save figure
+        output_file(os.path.join(figure_data_file_path,"figure.html"))
+        save(bokeh_figure)
 
         with open(os.path.join(figure_path,"table.html"),'w') as table_file:
             table_file.write(Annotation_Table)
@@ -508,7 +568,6 @@ class kb_orthofinder:
             format = file.split('.')[-1].upper()
 
             if(format == "PNG"):
-#                html_string+="<p><img src=\""+file+"\"/></p></body></html>"
                 html_string+="<center><figure><img src=\""+file+"\"/>"+caption+"</figure></center>"
 
             output_files.append({'path' : os.path.join(figure_path,file),
