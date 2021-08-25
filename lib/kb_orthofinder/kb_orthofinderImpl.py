@@ -300,8 +300,7 @@ class kb_orthofinder:
         #####################################################
         output_files=list()
         if(testing is False):
-            self.log("Running OrthoFinder command (not): "+command)
-            return([])
+            self.log("Running OrthoFinder command: "+command)
 
             pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 
