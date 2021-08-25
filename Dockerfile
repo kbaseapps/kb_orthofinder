@@ -8,8 +8,12 @@ MAINTAINER KBase Developer
 
 RUN apt-get update && apt-get install -y wget
 
+RUN conda install -c conda-forge phantomjs
+
 RUN pip install --upgrade pip && \
-    pip install scipy
+    pip install scipy && \
+    pip install bokeh && \
+    pip install selenium
 
 RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v2.0.9/diamond-linux64.tar.gz && \
     tar -zxf diamond-linux64.tar.gz diamond && \
