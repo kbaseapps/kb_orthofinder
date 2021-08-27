@@ -1,6 +1,21 @@
 # kb_orthofinder release notes
 =========================================
 
+2.0.0
+-----
+* Major release of kb_orthofinder
+
+    * The reference genomes used to generate the protein families were
+      updated to include the latest gene model versions released as
+      part of Phytozome V12
+
+    * "Annotate Plant Enzymes with OrthoFinder" has a new output table
+      which captures the homologous relationships within the protein
+      families and shows the user any putative orthologs that did not
+      make the "cut"
+
+    * Updated to use the Python 3 and minor bug fixes
+
 1.0.0
 -----
 * Major release of kb_orthofinder
