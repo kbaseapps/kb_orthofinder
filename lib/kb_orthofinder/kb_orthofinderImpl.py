@@ -403,7 +403,7 @@ class kb_orthofinder:
         #Pairwise sequence identity and propagate annotation
         functions_dict=dict()
         found_annotations=list()
-        clustered_features_dict=dict()
+        annotated_features_dict=dict()
         self.log("Computing Sequence Identity on "+str(len(families_dict.keys()))+" Curated Alignments")
         for family in families_dict.keys():
 
@@ -426,7 +426,7 @@ class kb_orthofinder:
                                                                       input['threshold'],
                                                                       plantseed_curation)
                 ftr = spp_ftr.replace(temp_genome_name+"_","")
-                clustered_features_dict[ftr]=function
+                annotated_features_dict[ftr]=function
                 if(function not in found_annotations):
                     found_annotations.append(function)
 
@@ -436,41 +436,54 @@ class kb_orthofinder:
                     functions_dict[function][family]['hits'].append({'seqid':seqid,
                                                                      'feature':spp_ftr})
         output['hit_fns']=len(found_annotations)
-        output['hit_ftrs']=len(clustered_features_dict.keys())
+        output['hit_ftrs']=len(annotated_features_dict.keys())
 
         #Now, re-populate feature functions, and save genome object
-        #But, if annotating CDS, need to be able to retrieve parent feature
+        #But, if annotating CDS, need to be able to retrieve parent feature/transcripts
         parent_feature_index = dict()
+        parent_transcript_index = dict()
         if(use_cds==1):
             parent_feature_index = dict([(f['id'], i) for i, f in enumerate(plant_genome['data']['features'])])
+            parent_transcript_index = dict([(f['id'], i) for i, f in enumerate(plant_genome['data']['mrnas'])])
 
         self.log("Populating plant genome with newly clustered functions")
-        #Add annotation to protein-coding genes
+        # Add annotation to protein-coding genes
+        # As the phytozome genomes have CDSs, the features don't usually get annotated here
         for ftr in plant_genome['data']['features']:
             ftr['functions']=["Unannotated"]
-            if(ftr['id'] in clustered_features_dict):
-                ftr['functions']=[clustered_features_dict[ftr['id']]]
+            if(ftr['id'] in annotated_features_dict):
+                ftr['functions']=[annotated_features_dict[ftr['id']]]
 
-        #Add annotation to transcripts
+        # Add annotation to transcripts
+        # As the phytozome genomes have CDSs, the features don't usually get annotated here
         for mrna in plant_genome['data']['mrnas']:
             mrna['functions']=["Unannotated"]
-            if(mrna['id'] in clustered_features_dict):
-                mrna['functions']=[clustered_features_dict[mrna['id']]]
-                plant_genome['data']['features'][parent_feature_index[mrna['parent_gene']]]['functions']=[clustered_features_dict[mrna['id']]]
-            elif(mrna['parent_gene'] in clustered_features_dict):
-                mrna['functions']=[clustered_features_dict[mrna['parent_gene']]]
-                plant_genome['data']['features'][parent_feature_index[mrna['parent_gene']]]['functions']=[clustered_features_dict[mrna['parent_gene']]]
+            if(mrna['id'] in annotated_features_dict):
+                mrna['functions']=[annotated_features_dict[mrna['id']]]
 
-        #Add annotation to proteins
+                # Annotate parent feature gene
+                plant_genome['data']['features'][parent_feature_index[mrna['parent_gene']]]['functions']=[annotated_features_dict[mrna['id']]]
+            elif(mrna['parent_gene'] in annotated_features_dict):
+                mrna['functions']=[annotated_features_dict[mrna['parent_gene']]]
+
+        # Add annotation to proteins
+        # As the phytozome genomes have CDSs, the features and mrnas get annotated here
         for cds in plant_genome['data']['cdss']:
             cds['functions']=["Unannotated"]
-            if(cds['id'] in clustered_features_dict):
-                cds['functions']=[clustered_features_dict[cds['id']]]
-                plant_genome['data']['features'][parent_feature_index[cds['parent_gene']]]['functions']=[clustered_features_dict[cds['id']]]
-            elif(cds['parent_gene'] in clustered_features_dict):
-                cds['functions']=[clustered_features_dict[cds['parent_gene']]]
-                plant_genome['data']['features'][parent_feature_index[cds['parent_gene']]]['functions']=[clustered_features_dict[cds['parent_gene']]]
+            if(cds['id'] in annotated_features_dict):
+                cds['functions']=[annotated_features_dict[cds['id']]]
+
+                # Annotate parent feature gene
+                plant_genome['data']['features'][parent_feature_index[cds['parent_gene']]]['functions']=[annotated_features_dict[cds['id']]]
+
+                # Annotate parent transcript
+                plant_genome['data']['mrnas'][parent_transcript_index[cds['parent_mrna']]]['functions']=[annotated_features_dict[cds['id']]]
+            elif(cds['parent_gene'] in annotated_features_dict):
+                cds['functions']=[annotated_features_dict[cds['parent_gene']]]
                 
+                # Annotate parent transcript
+                plant_genome['data']['mrnas'][parent_transcript_index[cds['parent_mrna']]]['functions']=[annotated_features_dict[cds['parent_gene']]]
+
         #Save genome
         with open("/kb/module/work/tmp/shit.json","w") as fh:
             import json
@@ -562,7 +575,7 @@ class kb_orthofinder:
         html_string+="this result indicates that, for this set of protein sequences, "
         html_string+="the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
         html_string+=" of the enzymatic functions of plant primary metabolism that were "
-        html_string+="curated as part of the PlantSEED project.</p></br>"
+        html_string+="curated as part of the PlantSEED project.</p>"
         html_string+="<p>The results of the annotation are tabulated in this "
         html_string+="<a href=\""+table_html_file+"\" target=\"_blank\">Table</a></p></div>"
 
