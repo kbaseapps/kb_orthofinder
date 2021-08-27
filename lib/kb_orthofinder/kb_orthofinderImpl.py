@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import itertools
 import time
+from urllib.request import urlopen
 
 from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.GenomeFileUtilClient import GenomeFileUtil
@@ -21,11 +22,9 @@ from kb_orthofinder.GenerateFigure import GenerateFigure
 
 from bokeh.plotting import output_file, save
 
-PS_url = 'https://raw.githubusercontent.com/ModelSEED/PlantSEED/'
-PS_tag = 'kbase_release'
+from kb_orthofinder.core.fetch_plantseed_impl import FetchPlantSEEDImpl
 
 #END_HEADER
-
 
 class kb_orthofinder:
     '''
@@ -122,7 +121,8 @@ class kb_orthofinder:
 
         return clustered_sequences
 
-    def propagate_annotation(self, cluster, threshold, arabidopsis_functions):
+    def propagate_annotation(self, cluster, threshold, plantseed_curation):
+
         top_orthologs = dict()
         for ortholog in (cluster.keys()):
             
@@ -138,7 +138,7 @@ class kb_orthofinder:
         #Key to controlling the propagation of annotation
         #Is the sequence identity of the highest-scoring ortholog good enough?
         if(float(top_ortholog_seqid) < threshold):
-            return (None,"Uncurated",0.0)
+            return (None,"Unannotated",0.0)
 
         top_ortholog=""
         if(len(top_orthologs[top_ortholog_seqid])==1):
@@ -149,23 +149,27 @@ class kb_orthofinder:
 
             Multi_Functions = dict()
             for ortholog in (top_orthologs[top_ortholog_seqid].keys()):
-                if(ortholog not in arabidopsis_functions):
-                    function = "Uncurated"
-                    arabidopsis_functions[ortholog]=function
+                function="Unannotated"
+                ortholog_gene = ".".join(ortholog.split('.')[0:-1])
+                if(ortholog_gene not in plantseed_curation):
+                    plantseed_curation[ortholog_gene]={'function':function}
                 else:
-                    function = arabidopsis_functions[ortholog]
+                    function = plantseed_curation[ortholog_gene]['function']
                 Multi_Functions[function]=1
 
             #Rules are:
             # 0) if 1 function, arbitrarily pick ath ortholog
-            # 1) if 2 functions, and one is "Uncurated", prioritize curation (arbitrarily pick ath ortholog that is curated)
-            # 2) if 2 functions, and none is "Uncurated" or > 2 functions, make it ambiguous
+            # 1) if 2 functions, and one is "Unannotated", 
+            #    prioritize annotated function
+            # 2) if 2 functions, and none is "Unannotated" or > 2 functions, 
+            #    its ambiguous, return without doing anything
 
             if(len(Multi_Functions.keys())==1):
                 top_ortholog = list(top_orthologs[top_ortholog_seqid].keys())[0]
-            elif(len(Multi_Functions.keys())==2 and "Uncurated" in Multi_Functions.keys()):
+            elif(len(Multi_Functions.keys())==2 and "Unannotated" in Multi_Functions.keys()):
                 for ortholog in (top_orthologs[top_ortholog_seqid].keys()):
-                    if(arabidopsis_functions[ortholog] == "Uncurated"):
+                    ortholog_gene = ".".join(ortholog.split('.')[0:-1])
+                    if(plantseed_curation[ortholog_gene]['function'] == "Unannotated"):
                         continue
                     top_ortholog = ortholog
                     break
@@ -173,10 +177,11 @@ class kb_orthofinder:
                 #Ambiguously curated top orthologs, so pass
                 pass
 
-        if(top_ortholog in arabidopsis_functions):
-            return (top_ortholog,arabidopsis_functions[top_ortholog],top_ortholog_seqid)
+        top_ortholog_gene = ".".join(top_ortholog.split('.')[0:-1])
+        if(top_ortholog_gene in plantseed_curation):
+            return (top_ortholog,plantseed_curation[top_ortholog_gene]['function'],top_ortholog_seqid)
         else:
-            return (None,"Uncurated",0.0)
+            return (None,"Unannotated",0.0)
 
     #END_CLASS_HEADER
 
@@ -192,7 +197,6 @@ class kb_orthofinder:
         self.gfu = GenomeFileUtil(self.callback_url)
         #END_CONSTRUCTOR
         pass
-
 
     def annotate_plant_transcripts(self, ctx, input):
         """
@@ -330,32 +334,23 @@ class kb_orthofinder:
                 Ignored_Curation[line]=1
 
         #Parse PlantSEED families and annotation
-        PlantSEED_Curation=dict()
-        Curation_File = "Arabidopsis_Family_Curation.txt"
+        plantseed = FetchPlantSEEDImpl()
+        plantseed_curation = plantseed.fetch_features()
 
-        output['fns']=dict()
-        self.log("Collecting PlantSEED Curation")
+        self.log("Collecting PlantSEED Curated Functions")
         PlantSEED_Roles=dict()
-        with open(os.path.join("/kb/module/data",Curation_File)) as plantseed_families_handle:
-            for line in plantseed_families_handle.readlines():
-                line=line.strip()
-                (family,transcript,curation)=line.split('\t')
-                PlantSEED_Curation[transcript]=curation
-                output['fns'][curation]=1
-         
-                #Split out comments
-                Function_Comments = curation.split("#")
-                for i in range(len(Function_Comments)):
-                    Function_Comments[i]=Function_Comments[i].strip()
+        output['fns']=list()
+        for feature in plantseed_curation:
+            function = plantseed_curation[feature]['function']
+            if( function not in output['fns'] ):
+                output['fns'].append(function)
 
-                Function = Function_Comments.pop(0)
-                Roles = re.split("\s*;\s+|\s+[\@\/]\s+", Function)
-                for role in Roles:
-                    if(role not in Ignored_Curation):
-                        PlantSEED_Roles[role]=1
+            for role in plantseed_curation[feature]['roles']:
+                if(role not in Ignored_Curation):
+                    PlantSEED_Roles[role]=1
 
-        output['fns']=len(output['fns'].keys())
-        output['transcripts']=len(PlantSEED_Curation.keys())
+        output['fns']=len(output['fns'])
+        output['transcripts']=len(list(plantseed_curation.keys()))
         output['alignments']=list()
 
         #Find, read alignments, collect families
@@ -377,23 +372,24 @@ class kb_orthofinder:
                 # join all sequence lines to one.
                 seq = "".join(s.strip() for s in faiter.__next__())
 
-                fasta_header=""
+                transcript_id=""
                 try:
-                    fasta_header, fasta_description = header.split(' ', 1)
+                    transcript_id, transcript_description = header.split(' ', 1)
                 except:
-                    fasta_header = header
-                    fasta_description = None
+                    transcript_id = header
+                    transcript_description = None
 
                 #skip un-necessary proteins to reduce computation time
-                if("Athaliana" not in fasta_header and fasta_header not in sequences_dict):
+                if("Athaliana" not in transcript_id and transcript_id not in sequences_dict):
                     continue
 
                 seq = seq.upper()
-                family_sequences_dict[fasta_header]=seq
-                if(fasta_header in PlantSEED_Curation):
-                    function = PlantSEED_Curation[fasta_header]
-                    curated_family.append(function+"|||"+fasta_header)
-                    output['alignments'].append(fasta_header)
+                family_sequences_dict[transcript_id]=seq
+                gene_id = ".".join(transcript_id.split('.')[0:-1])
+                if(gene_id in plantseed_curation):
+                    function = plantseed_curation[gene_id]['function']
+                    curated_family.append(function+"|||"+transcript_id)
+                    output['alignments'].append(transcript_id)
             
             if(len(curated_family)>0):
                 if(family not in families_dict):
@@ -428,7 +424,7 @@ class kb_orthofinder:
             for spp_ftr in sorted(pw_seq_id_list.keys()):
                 (ortholog,function,seqid) = self.propagate_annotation(pw_seq_id_list[spp_ftr],
                                                                       input['threshold'],
-                                                                      PlantSEED_Curation)
+                                                                      plantseed_curation)
                 ftr = spp_ftr.replace(temp_genome_name+"_","")
                 clustered_features_dict[ftr]=function
                 if(function not in found_annotations):
@@ -451,18 +447,36 @@ class kb_orthofinder:
         self.log("Populating plant genome with newly clustered functions")
         #Add annotation to protein-coding genes
         for ftr in plant_genome['data']['features']:
-            ftr['functions']=["Uncurated"]
+            ftr['functions']=["Unannotated"]
             if(ftr['id'] in clustered_features_dict):
                 ftr['functions']=[clustered_features_dict[ftr['id']]]
 
+        #Add annotation to transcripts
+        for mrna in plant_genome['data']['mrnas']:
+            mrna['functions']=["Unannotated"]
+            if(mrna['id'] in clustered_features_dict):
+                mrna['functions']=[clustered_features_dict[mrna['id']]]
+                plant_genome['data']['features'][parent_feature_index[mrna['parent_gene']]]['functions']=[clustered_features_dict[mrna['id']]]
+            elif(mrna['parent_gene'] in clustered_features_dict):
+                mrna['functions']=[clustered_features_dict[mrna['parent_gene']]]
+                plant_genome['data']['features'][parent_feature_index[mrna['parent_gene']]]['functions']=[clustered_features_dict[mrna['parent_gene']]]
+
         #Add annotation to proteins
         for cds in plant_genome['data']['cdss']:
-            cds['functions']=["Uncurated"]
+            cds['functions']=["Unannotated"]
             if(cds['id'] in clustered_features_dict):
                 cds['functions']=[clustered_features_dict[cds['id']]]
                 plant_genome['data']['features'][parent_feature_index[cds['parent_gene']]]['functions']=[clustered_features_dict[cds['id']]]
+            elif(cds['parent_gene'] in clustered_features_dict):
+                cds['functions']=[clustered_features_dict[cds['parent_gene']]]
+                plant_genome['data']['features'][parent_feature_index[cds['parent_gene']]]['functions']=[clustered_features_dict[cds['parent_gene']]]
                 
         #Save genome
+        with open("/kb/module/work/tmp/shit.json","w") as fh:
+            import json
+            json.dump(plant_genome, fh)
+            fh.close()
+
         if('output_genome' not in input):
             input['output_genome']=input['input_genome']
 
@@ -477,38 +491,6 @@ class kb_orthofinder:
 
         #reference of saved genome
         saved_genome = "{}/{}/{}".format(save_result[6],save_result[0],save_result[4])
-
-        #Calculate fraction of PlantSEED functional roles
-        table_generator = GenerateTableImpl()
-        Annotation_Table = table_generator.generate_table(functions_dict)
-
-        # with open("/kb/module/work/tmp/shit.json","w") as fh:
-        #    import json
-        #    json.dump(functions_dict, fh)
-        #    fh.close()
-
-        # for curation in functions_dict.keys():
-        #    print(curation,functions_dict[curation])
-        #    for ftr in sorted(functions_dict[curation].keys()):
-        #        ftr_hash=functions_dict[curation][ftr]
-        #        if(ftr_hash['ortholog'] is None):
-        #            continue
-        #
-        #        annotation_row="<tr><td>"+curation+"</td><td>"+ftr+"</td>"
-        #        annotation_row+="<td>"+ftr_hash['ortholog']+"</td><td>"+ftr_hash['seqid']+"</td></tr>"
-        #        Annotation_Table+=annotation_row
-        #
-        #    #Split out comments
-        #    Function_Comments = curation.split("#")
-        #    for i in range(len(Function_Comments)):
-        #        Function_Comments[i]=Function_Comments[i].strip()
-        # 
-        #    Function = Function_Comments.pop(0)
-        #    Roles = re.split("\s*;\s+|\s+[\@\/]\s+", Function)
-        #    for role in Roles:
-        #        if(role in PlantSEED_Roles):
-        #            Annotated_Roles[role]=1
-        # Annotation_Table+="</table>"
 
         Annotated_Roles=dict()
         for curation in found_annotations:
@@ -525,78 +507,122 @@ class kb_orthofinder:
         output['hit_fns']=len(found_annotations)
         output['cur_roles']=len(PlantSEED_Roles.keys())
         output['hit_roles']=len(Annotated_Roles.keys())
+
+        # Calculate fraction of PlantSEED functional roles
         fraction_plantseed = float( (float(len(Annotated_Roles.keys())) / float(len(PlantSEED_Roles.keys()))) )
-        figure_params = {'threshold':input['threshold'],'fraction':fraction_plantseed,'id':input['input_genome']}
-        figure_path = self.generate_figure(figure_params)
-        
+
+        # HTML Folder Path
+        uuid_string = str(uuid.uuid4())
+        html_file_path=os.path.join(self.scratch,uuid_string)
+        os.mkdir(html_file_path)
+
+        # Generate figure: 
+        #     the path parameter is for the reference data that is integrated into the figure.
         figure_generator = GenerateFigureImpl("/kb/module/data/")
         bokeh_figure = figure_generator.generate_figure(input['threshold'],
                                                         fraction_plantseed)
-        # Figure Path
-        uuid_string = str(uuid.uuid4())
-        figure_data_file_path=os.path.join(self.scratch,uuid_string)
-        os.mkdir(figure_data_file_path)
 
         # Save figure
-        output_file(os.path.join(figure_data_file_path,"figure.html"))
+        figure_html_file="figure.html"
+        output_file(os.path.join(html_file_path,figure_html_file))
         save(bokeh_figure)
 
-        with open(os.path.join(figure_path,"table.html"),'w') as table_file:
-            table_file.write(Annotation_Table)
+        # Generate table
+        table_generator = GenerateTableImpl()
+        annotation_table_string = table_generator.generate_table(functions_dict)
 
+        # Save table
+        # Read in template html
+        with open(os.path.join('/kb/module/data',
+                               'app_report_templates',
+                               'annotation_report_tables_template.html')) as report_template_file:
+            report_template_string = report_template_file.read()
+
+        # Generate and Insert html title
+        #     This needs to be done because it affects the name of the CSV download
+        title_string = "-".join([input['input_genome'],str(input['threshold'])])
+        report_template_string = report_template_string.replace('*TITLE*', title_string)
+
+        # Insert table into template
+        table_report_string = report_template_string.replace('*TABLES*', annotation_table_string)
+
+        # Save table
+        table_html_file = "table.html"
+        with open(os.path.join(html_file_path,table_html_file),'w') as table_file:
+            table_file.write(table_report_string)
+
+        # Generate main index.html content
         html_string="<html><head><title>KBase Plant OrthoFinder Report</title></head><body>"
+        html_string+="<div style=\"text-align: center; max-width: 800px\">"
         html_string+="<p>The Plant OrthoFinder app has finished running: "
-        html_string+=str(output['ftrs'])+" protein sequences were clustered with "+str(output['transcripts'])+ " PlantSEED-curated enzymes. "
-        html_string+="The app was able to predict "+str(output['hit_fns'])+" enzymatic functions for "+str(output['hit_ftrs'])+" protein sequences and "
-        html_string+="this result indicates that, for this set of protein sequences, the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
-        html_string+=" of the enzymatic functions of plant primary metabolism that were curated as part of the PlantSEED project.</p>"
+        html_string+=str(output['ftrs'])+" protein sequences were clustered "
+        html_string+="with "+str(output['transcripts'])+ " PlantSEED-curated enzymes. "
+        html_string+="The app was able to predict "+str(output['hit_fns'])+" enzymatic functions "
+        html_string+="for "+str(output['hit_ftrs'])+" protein sequences and "
+        html_string+="this result indicates that, for this set of protein sequences, "
+        html_string+="the app detected {0:.0f}%".format(float(fraction_plantseed*100.0))
+        html_string+=" of the enzymatic functions of plant primary metabolism that were "
+        html_string+="curated as part of the PlantSEED project.</p></br>"
+        html_string+="<p>The results of the annotation are tabulated in this "
+        html_string+="<a href=\""+table_html_file+"\" target=\"_blank\">Table</a></p></div>"
 
-        caption="<figcaption><b>Figure 1: Propagation of metabolic roles for "+str(input['input_genome'])+". </b>"
-        caption+="The PlantSEED project curated "+str(output['cur_roles'])+" distinct primary metabolic roles for Arabidopsis thaliana. "
-        caption+="Here we show the impact of propagating these roles to other species using sequence identity. "
-        caption+="For each group of species, and for a different threshold of sequence identity, we show the fraction of curated roles that were "
-        caption+="propagated. The fraction of propagated roles decreases as a function of similarity and phylogenetic distance. "
-        caption+="The fraction of roles that were propagated for "+input['input_genome']+" at the chosen threshold of "
+        caption="<figcaption><b>Figure 1: Propagation of metabolic roles for "
+        caption+=str(input['input_genome'])+". </b>"
+        caption+="The PlantSEED project curated "+str(output['cur_roles'])
+        caption+=" distinct primary metabolic roles for Arabidopsis thaliana. "
+        caption+="Here we show the impact of propagating these roles to other "
+        caption+="species using sequence identity. "
+        caption+="For each group of species, and for a different threshold of "
+        caption+="sequence identity, we show the fraction of curated roles that were "
+        caption+="propagated. The fraction of propagated roles decreases as a function "
+        caption+="of similarity and phylogenetic distance. "
+        caption+="The fraction of roles that were propagated for "+input['input_genome']
+        caption+=" at the chosen threshold of "
         caption+=str(input['threshold'])+" for sequence identity is {0:.2f}".format(float(fraction_plantseed))
         caption+=" and is marked by the bold plus. "
-        caption+=" A user may re-run the app with a different threshold; a higher threshold will increase the reliability of the results, but will "
-        caption+=" reduce the number of propagated metabolic roles; a lower threshold will increase the number of propagated metabolic roles but "
-        caption+=" also increase the number of propagations, increasing the likelihood of a false positive.</figcaption>"
+        caption+=" A user may re-run the app with a different threshold; a higher "
+        caption+="threshold will increase the reliability of the results, but will "
+        caption+=" reduce the number of propagated metabolic roles; a lower threshold "
+        caption+="will increase the number of propagated metabolic roles but "
+        caption+=" also increase the number of propagations, increasing the likelihood "
+        caption+="of a false positive. This figure can be viewed in a separate window "
+        caption+="<a href=\""+figure_html_file+"\" target=\"_blank\">here</a></figcaption>"
 
-        for file in os.listdir(figure_path):
-            format = file.split('.')[-1].upper()
-
-            if(format == "PNG"):
-                html_string+="<center><figure><img src=\""+file+"\"/>"+caption+"</figure></center>"
-
-            output_files.append({'path' : os.path.join(figure_path,file),
-                                 'name' : file,
-                                 'label' : "PyGrace Figure",
-                                 'description' : 'PyGrace Figure in '+format+' format'})
+        html_string+="<div style=\"text-align: center; max-width: 620px\">"
+        html_string+="<embed type=\"text/html\" src=\""+figure_html_file+"\" width=\"620\" height=\"620\"></embed>"
+        html_string+=caption
+        html_string+="</div></body></html>"
 
         #Save index file
-        with open(os.path.join(figure_path,"index.html"),'w') as index_file:
+        with open(os.path.join(html_file_path,"index.html"),'w') as index_file:
             index_file.write(html_string)
 
-        upload_info = self.dfu.file_to_shock({'file_path': figure_path,
+        upload_info = self.dfu.file_to_shock({'file_path': html_file_path,
                                               'pack': 'zip'})
-            
-        html_folder = {'shock_id' : upload_info['shock_id'], #Used instead of 'path'
-                       #'path' : figure_path, #KBaseReport zip_archive() is broken
-                       'name' : 'index.html', #Used for URL path
-                       'label' : 'html files',
-                       'description' : 'HTML files'}
+
+        html_report_list=list()
+        html_link = {'shock_id' : upload_info['shock_id'],
+                     'name' : figure_html_file,
+                     'label' : 'Scatterplot figures generated by Integrate Abundances with Metabolism app',
+                     'description' : 'Scatterplot figures generated by Integrate Abundances with Metabolism app'}
+        html_report_list.append(html_link)
+
+        html_link = {'shock_id' : upload_info['shock_id'],
+                     'name' : table_html_file,
+                     'label' : 'Scatterplot figures generated by Integrate Abundances with Metabolism app',
+                     'description' : 'Scatterplot figures generated by Integrate Abundances with Metabolism app'}
+        html_report_list.append(html_link)
 
         description = "Plant genome "+plant_genome['data']['id']+" annotated with metabolic functions"
 
         uuid_string = str(uuid.uuid4())
-        report_params = { 'objects_created' : [{"ref":saved_genome,"description":description}],
-                          'file_links' : output_files,
-                          'html_links' : [html_folder],
-                          'direct_html_link_index' : 0, #Use to refer to index of 'html_links'
-#                          'direct_html' : html_string, # Can't embed images
+        report_params = { 'direct_html_link_index' : 0, #Use to refer to index of 'html_links'
                           'workspace_name' : input['input_ws'],
-                          'report_object_name' : 'kb_orthofinder_' + uuid_string }
+                          'report_object_name' : 'kb_orthofinder_' + uuid_string,
+                          'objects_created' : [{"ref":saved_genome,"description":description}],
+                          'file_links' : output_files,
+                          'html_links' : html_report_list}
+
         kbase_report_client = KBaseReport(self.callback_url, token=self.token)
         report_client_output = kbase_report_client.create_extended_report(report_params)
         output['report_name']=report_client_output['name']
