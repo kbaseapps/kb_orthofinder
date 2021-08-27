@@ -131,10 +131,10 @@ class kb_orthofinderTest(unittest.TestCase):
                                                                             'threshold' : 0.55})
 
         print("RESULT: ",ret[0])
-        self.assertEqual(ret[0]['transcripts'],2030)
-        self.assertEqual(ret[0]['alignments'],1754)
+        self.assertEqual(ret[0]['transcripts'],1443)
+        self.assertEqual(ret[0]['alignments'],1204)
         self.assertEqual(ret[0]['ftrs'],975)
-        self.assertEqual(ret[0]['fns'],816)
-        self.assertEqual(ret[0]['hit_ftrs'],73)
+        self.assertEqual(ret[0]['fns'],819)
+        self.assertEqual(ret[0]['hit_ftrs'],63)
         self.assertEqual(ret[0]['hit_fns'],39)
         pass
