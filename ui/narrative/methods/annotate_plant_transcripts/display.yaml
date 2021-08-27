@@ -56,20 +56,20 @@ description : |
     <u><b>Reference Species</b></u>
     <ul>
     <li> <i>Arabidopsis thaliana</i> <b>TAIR10</b></li>
-    <li> <i>Atrichopoda</i> <b>v1.0</b></li>
-    <li> <i>Bdistachyon</i> <b>v3.1</b></li>
-    <li> <i>Creinhardtii</i> <b>v5.6</b></li>
-    <li> <i>Csinensis</i> <b>v1.1</b></li>
-    <li> <i>Gmax</i> <b>Wm82.a4.v1</b></li>
-    <li> <i>Mdomestica</i> <b>v1.0</b></li>
-    <li> <i>Olucimarinus</i> <b>v2.0</b></li>
-    <li> <i>Osativa</i> <b>v7.0</b></li>
-    <li> <i>Ptrichocarpa</i> <b>v4.1</b></li>
-    <li> <i>Sbicolor</i> <b>v3.1.1</b></li>
-    <li> <i>Slycopersicum</i> <b>ITAG3.2</b></li>
-    <li> <i>Smoellendorffii</i> <b>v1.0</b></li>
-    <li> <i>Spolyrhiza</i> <b>v2</b></li>
-    <li> <i>Zmays</i> <b>RefGen V4</b></li>
+    <li> <i>Amborella trichopoda</i> <b>v1.0</b></li>
+    <li> <i>Brachypodium distachyon</i> <b>v3.1</b></li>
+    <li> <i>Chlamydomonas reinhardtii</i> <b>v5.6</b></li>
+    <li> <i>Citrus sinensis</i> <b>v1.1</b></li>
+    <li> <i>Glycine max</i> <b>Wm82.a4.v1</b></li>
+    <li> <i>Malus domestica</i> <b>v1.0</b></li>
+    <li> <i>Ostreococcus lucimarinus</i> <b>v2.0</b></li>
+    <li> <i>Oryza sativa</i> <b>v7.0</b></li>
+    <li> <i>Populus trichocarpa</i> <b>v4.1</b></li>
+    <li> <i>Sorghum bicolor</i> <b>v3.1.1</b></li>
+    <li> <i>Solanum lycopersicum</i> <b>ITAG3.2</b></li>
+    <li> <i>Selaginella moellendorffii</i> <b>v1.0</b></li>
+    <li> <i>Spirodela polyrhiza</i> <b>v2</b></li>
+    <li> <i>Zea mays</i> <b>RefGen V4</b></li>
     </ul>
     
     <u><b>Data</b></u>
