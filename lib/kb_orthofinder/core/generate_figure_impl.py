@@ -1,4 +1,5 @@
 from bokeh.plotting import figure, output_file, save
+from bokeh.models import NumeralTickFormatter
 
 import time
 import json
@@ -27,9 +28,12 @@ class GenerateFigureImpl:
 
     def generate_figure(self,x,y):
 
-        bokeh_fig = figure()
+        bokeh_fig = figure(x_range = (0.0,1.0),
+                           y_range = (0.0,1.0))
         bokeh_fig.xaxis.axis_label = "Sequence Identity Threshold"
         bokeh_fig.yaxis.axis_label = "Fraction of Curated Enzymes"
+        bokeh_fig.xaxis.formatter = NumeralTickFormatter(format="0.0")
+        bokeh_fig.yaxis.formatter = NumeralTickFormatter(format="0.0")
 
         data_order = ["Brassicaceae","Eudicot","Liliopsida","Embryophyta","Chlorophyta"]
         colors={"Brassicaceae":'red',
