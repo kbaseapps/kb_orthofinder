@@ -96,7 +96,7 @@ class kb_orthofinderTest(unittest.TestCase):
         cls.tr_filename = cls.test_data+'.tar.gz'
         cls.tr_path = os.path.join("/kb", "module", "data", cls.tr_filename)
         # cls.tr_path = os.path.join(cls.scratch, cls.tr_filename)
-        # This is now copied and unarchived in scripts/entrypoint.sh
+        # This is now copied and unarchived in scripts/entrypoint.sh for the Results
         # shutil.copy(os.path.join("/kb", "module", "data", cls.tr_filename), cls.tr_path)
 
     def loadFakeGenome(cls):
@@ -124,9 +124,16 @@ class kb_orthofinderTest(unittest.TestCase):
         # self.dfu.unpack_file({'file_path' : self.tr_path})
         unpacked_tr = self.tr_path.replace('.tar.gz','')
 
-        # Running Plant RAST
-        ret = self.getImpl().annotate_plant_transcripts(self.getContext(), {'input_ws' : self.getWsName(),
-                                                                            'input_genome' : self.genome,
+        # The commented out values are for testing a large and close relative
+        # input_ws = "seaver:narrative_1538440679496"
+        # input_genome = "Brassica_rapa"
+
+        # These values are for the original test case
+        input_ws = self.getWsName()
+        input_genome = self.genome
+        
+        ret = self.getImpl().annotate_plant_transcripts(self.getContext(), {'input_ws' : input_ws,
+                                                                            'input_genome' : input_genome,
                                                                             'families_path' : unpacked_tr,
                                                                             'threshold' : 0.55})
 
