@@ -108,7 +108,7 @@ class kb_orthofinder:
 
                 ID1=AA_Match/len(Seq1)
                 ID2=AA_Match/len(Seq2)
-                Avg = "{0:.2f}".format((ID1+ID2)/2.0)
+                Avg = "{0:.6f}".format((ID1+ID2)/2.0)
 
                 if("Athaliana" in Spp1):
                     if(features[j] not in clustered_sequences):
@@ -138,7 +138,7 @@ class kb_orthofinder:
         #Key to controlling the propagation of annotation
         #Is the sequence identity of the highest-scoring ortholog good enough?
         if(float(top_ortholog_seqid) < threshold):
-            return (None,"Unannotated",0.0)
+            return (None,"Unannotated 1: LESS_THAN_THRESHOLD",0.0)
 
         top_ortholog=""
         if(len(top_orthologs[top_ortholog_seqid])==1):
@@ -148,11 +148,13 @@ class kb_orthofinder:
             #Collect the actual functions and see if there's multiple functions
 
             Multi_Functions = dict()
+            Unannotated = False
             for ortholog in (top_orthologs[top_ortholog_seqid].keys()):
                 function="Unannotated"
                 ortholog_gene = ".".join(ortholog.split('.')[0:-1])
                 if(ortholog_gene not in plantseed_curation):
-                    plantseed_curation[ortholog_gene]={'function':function}
+                    function = "Unannotated 2: ARA_GENE_NOT_IN_CURATION"
+                    Unannotated = True
                 else:
                     function = plantseed_curation[ortholog_gene]['function']
                 Multi_Functions[function]=1
@@ -161,27 +163,41 @@ class kb_orthofinder:
             # 0) if 1 function, arbitrarily pick ath ortholog
             # 1) if 2 functions, and one is "Unannotated", 
             #    prioritize annotated function
-            # 2) if 2 functions, and none is "Unannotated" or > 2 functions, 
+            # 2) if 2 functions and one is a subset of the other (i.e. compartmentalization)
+            #    arbitrarily pick ath ortholog
+            # 3) if 2 functions, and none is "Unannotated" or > 2 functions, 
             #    its ambiguous, return without doing anything
-
+            is_ambiguous=False
             if(len(Multi_Functions.keys())==1):
                 top_ortholog = list(top_orthologs[top_ortholog_seqid].keys())[0]
-            elif(len(Multi_Functions.keys())==2 and "Unannotated" in Multi_Functions.keys()):
-                for ortholog in (top_orthologs[top_ortholog_seqid].keys()):
-                    ortholog_gene = ".".join(ortholog.split('.')[0:-1])
-                    if(plantseed_curation[ortholog_gene]['function'] == "Unannotated"):
-                        continue
-                    top_ortholog = ortholog
-                    break
+            elif(len(Multi_Functions.keys())==2):
+                if(Unannotated is True):
+                    for ortholog in (top_orthologs[top_ortholog_seqid].keys()):
+                        ortholog_gene = ".".join(ortholog.split('.')[0:-1])
+                        if(ortholog_gene not in plantseed_curation):
+                            continue
+                        top_ortholog = ortholog
+                        break
+                else:
+                    functions_list = sorted(list(Multi_Functions.keys()))
+                    if( functions_list[0] in functions_list[1] or \
+                            functions_list[1] in functions_list[0] ):
+                        top_ortholog = list(top_orthologs[top_ortholog_seqid].keys())[0]
+                    else:
+                        is_ambiguous=True
             else:
+                is_ambiguous=True
+
+            if(is_ambiguous is True):
                 #Ambiguously curated top orthologs, so pass
-                pass
+                print("Ambiguous Functions: ","||".join(list(Multi_Functions.keys())))
+                return (None,"Unannotated 3: AMB_HIT",0.0)
 
         top_ortholog_gene = ".".join(top_ortholog.split('.')[0:-1])
         if(top_ortholog_gene in plantseed_curation):
             return (top_ortholog,plantseed_curation[top_ortholog_gene]['function'],top_ortholog_seqid)
         else:
-            return (None,"Unannotated",0.0)
+            return (None,"Unannotated 4: NO_ARA_HIT",0.0)
 
     #END_CLASS_HEADER
 
@@ -230,8 +246,8 @@ class kb_orthofinder:
         if(use_cds==1):
             child_cds_index = dict([(f['id'], i) for i, f in enumerate(plant_genome['data']['cdss'])])
 
-        #If use_cds==1 iterate through features, iterate through CDSs, find longest sequence, use parent mRNA ID    
-        #If use_cds==0 use protein_translation field if available for feature, and feature ID
+        # If use_cds==1 iterate through features, iterate through CDSs, find longest sequence, use parent mRNA ID    
+        # If use_cds==0 use protein_translation field if available for feature, and feature ID
         self.log("Collecting protein sequences")
         sequences_dict=dict()
         for ftr in plant_genome['data']['features']:
@@ -264,9 +280,10 @@ class kb_orthofinder:
         family_file_path = ""
         testing = False
         if('families_path' in input and os.path.isdir(input['families_path'])):
-            testing = True
             family_file_path = input['families_path']
             self.log("Testing Reference Families at "+family_file_path)
+            if("Result" in family_file_path):
+                testing = True
         else:
             uuid_string = str(uuid.uuid4())
             family_file_path=os.path.join(self.scratch,uuid_string,"Reference_Results")
@@ -405,6 +422,9 @@ class kb_orthofinder:
         found_annotations=list()
         annotated_features_dict=dict()
         self.log("Computing Sequence Identity on "+str(len(families_dict.keys()))+" Curated Alignments")
+
+        # Save comprehensive output
+        annotate_fh = open("/kb/module/work/tmp/annotation_results.txt","w")
         for family in families_dict.keys():
 
             pw_seq_id_list = self.compute_clusters(families_dict[family]['sequences'])
@@ -426,8 +446,28 @@ class kb_orthofinder:
                                                                       input['threshold'],
                                                                       plantseed_curation)
                 ftr = spp_ftr.replace(temp_genome_name+"_","")
+
+                # Write out results
+                if(function not in functions_dict):
+                    annotate_fh.write("MISSING FUNCTION: "+" | ".join([function,family,str(ortholog),spp_ftr])+"\n")
+                else:
+                    annotate_fh.write("FOUND FUNCTION: "+" | ".join([function,family,str(ortholog),spp_ftr])+"\n")
+                    if(family not in functions_dict[function]):
+                        annotate_fh.write("MISSING FAMILY: "+" | ".join([function,family,str(ortholog),spp_ftr])+"\n")
+                    else:
+                        annotate_fh.write("FOUND FAMILY: "+" | ".join([function,family,str(ortholog),spp_ftr])+"\n")
+                        if(ortholog not in functions_dict[function][family]['orthologs']):
+                            annotate_fh.write("MISSING ORTHOLOG: "+" | ".join([function,family,str(ortholog),spp_ftr])+"\n")
+                        else:
+                            annotate_fh.write("FOUND ORTHOLOG: "+" | ".join([function,family,str(ortholog),spp_ftr])+"\n")
+
+                # Save result
+                if("Unannotated" in function):
+                    function="Unannotated"
+
                 annotated_features_dict[ftr]=function
-                if(function not in found_annotations):
+
+                if(function not in found_annotations and "Unannotated" not in function):
                     found_annotations.append(function)
 
                 if(function in functions_dict and \
@@ -435,6 +475,9 @@ class kb_orthofinder:
                        ortholog in functions_dict[function][family]['orthologs']):
                     functions_dict[function][family]['hits'].append({'seqid':seqid,
                                                                      'feature':spp_ftr})
+
+
+        annotate_fh.close()
         output['hit_fns']=len(found_annotations)
         output['hit_ftrs']=len(annotated_features_dict.keys())
 
@@ -485,7 +528,7 @@ class kb_orthofinder:
                 plant_genome['data']['mrnas'][parent_transcript_index[cds['parent_mrna']]]['functions']=[annotated_features_dict[cds['parent_gene']]]
 
         #Save genome
-        with open("/kb/module/work/tmp/shit.json","w") as fh:
+        with open("/kb/module/work/tmp/annotated_genome.json","w") as fh:
             import json
             json.dump(plant_genome, fh)
             fh.close()
