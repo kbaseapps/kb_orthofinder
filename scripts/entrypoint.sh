@@ -14,13 +14,13 @@ elif [ "${1}" = "test" ] ; then
   echo "Initializing test data"
   TEST_DATA=$(grep test_data ./deploy.cfg | awk '{print $3}')
   cd /kb/module/data
-  if [ -f OrthoFinder_Test_Result_Reference/SpeciesIDs.txt ] ; then
+  if [ -f ${TEST_DATA}/SpeciesIDs.txt ] ; then
       echo "Test data already present, skipping initialization"
   else
     PROTEIN_FAMILY_FILE="${TEST_DATA}.tar.gz"
     wget http://bioseed.mcs.anl.gov/~seaver/Files/PlantSEED/${PROTEIN_FAMILY_FILE}
     tar -zxf $PROTEIN_FAMILY_FILE
-    if [ -f OrthoFinder_Test_Result_Reference/SpeciesIDs.txt ] ; then
+    if [ -f ${TEST_DATA}/SpeciesIDs.txt ] ; then
       echo "Test data initialized"
     else
       echo "Test data initialization failed"
