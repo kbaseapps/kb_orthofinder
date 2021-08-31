@@ -32,6 +32,9 @@ class GenerateTableImpl:
         # regardless of function
         family_hit_dict=dict()
         for function in functions:
+            if(function == "Unannotated"):
+                continue
+
             for family in functions[function]:
 
                 if(family not in family_hit_dict):
@@ -40,21 +43,20 @@ class GenerateTableImpl:
                 for hit in functions[function][family]['hits']:
                     family_hit_dict[family].append(hit['feature'])
 
-
         ############################################################################
         # Each row in the table is unique to the combination of enzymatic annotation
         # curated Arabidopsis enzyme, for which we show the retrieved predicted ortholog
         # but we only show the potential orthologs from the same protein family
         for function in sorted(list(functions.keys())):
-            if(function == "Uncurated"):
+            if(function == "Unannotated"):
                 continue
 
             for family in functions[function]:
                 for ortholog in sorted(functions[function][family]['orthologs']):
 
-                    hit_list=list()
+                    hit_list=dict()
                     for hit in functions[function][family]['hits']:
-                        hit_list.append(hit['feature'])
+                        hit_list[hit['feature']]=hit['ortholog']
 
                     cls_list=list()
                     for cls_ftr in functions[function][family]['cluster'].keys():
@@ -66,11 +68,11 @@ class GenerateTableImpl:
                                 seqid = "{0:.2f}".format(float(seqid))
 
                                 ftr_seqid_str = cls_ftr+":"+seqid
-                                if(cls_ftr in hit_list):
-                                    # color green
+                                if(cls_ftr in hit_list and ortholog == hit_list[cls_ftr]):
+                                    # color red
                                     ftr_seqid_str = "<font color=\"red\">"+ftr_seqid_str+"</font>"
                                 elif(cls_ftr in family_hit_dict[family]):
-                                     # color red
+                                     # color light blue
                                      ftr_seqid_str = "<font color=\"light blue\">"+ftr_seqid_str+"</font>"
                                 else:
                                     # default color

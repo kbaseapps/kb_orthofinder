@@ -474,10 +474,17 @@ class kb_orthofinder:
                        family in functions_dict[function] and \
                        ortholog in functions_dict[function][family]['orthologs']):
                     functions_dict[function][family]['hits'].append({'seqid':seqid,
-                                                                     'feature':spp_ftr})
+                                                                     'feature':spp_ftr,
+                                                                     'ortholog':ortholog})
 
 
         annotate_fh.close()
+
+        with open("/kb/module/work/tmp/annotation_output.json","w") as fh:
+            import json
+            json.dump(functions_dict, fh)
+            fh.close()
+
         output['hit_fns']=len(found_annotations)
         output['hit_ftrs']=len(annotated_features_dict.keys())
 
