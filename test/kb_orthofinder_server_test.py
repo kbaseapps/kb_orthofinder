@@ -143,5 +143,5 @@ class kb_orthofinderTest(unittest.TestCase):
         self.assertEqual(ret[0]['ftrs'],975)
         self.assertEqual(ret[0]['fns'],819)
         self.assertEqual(ret[0]['hit_ftrs'],63)
-        self.assertEqual(ret[0]['hit_fns'],39)
+        self.assertEqual(ret[0]['hit_fns'],38)
         pass
