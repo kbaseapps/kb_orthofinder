@@ -19,12 +19,9 @@ Template_Compartment_Mapping={'c':'cytosol', 'g':'golgi', 'w':'cellwall',
 
 class FetchPlantSEEDImpl:
 
-    def fetch_reactions(self):
+    def fetch_reactions(self, PS_Roles):
 
         reactions_data = dict()
-
-        # Load these directly from PlantSEED_Roles.json
-        PS_Roles = json.load(urlopen(PS_url+PS_tag+'/Data/PlantSEED_v3/PlantSEED_Roles.json'))
 
         for entry in PS_Roles:
             if(entry['include'] is False):
@@ -76,12 +73,9 @@ class FetchPlantSEEDImpl:
         return reactions_data
 
 
-    def fetch_features(self):
+    def fetch_features(self, PS_Roles):
 
         features_data = dict()
-
-        # Load these directly from PlantSEED_Roles.json
-        PS_Roles = json.load(urlopen(PS_url+PS_tag+'/Data/PlantSEED_v3/PlantSEED_Roles.json'))
 
         for entry in PS_Roles:
         #    if(entry['include'] is False):
@@ -135,10 +129,14 @@ class FetchPlantSEEDImpl:
         pass
 
 def main():
-    plantseed = FetchPlantSEEDImpl()
-    plantseed_reactions = plantseed.fetch_reactions()
 
-    plantseed_features = plantseed.fetch_features()
+    # Load these directly from PlantSEED_Roles.json
+    PS_Roles = json.load(urlopen(PS_url+PS_tag+'/Data/PlantSEED_v3/PlantSEED_Roles.json'))
+
+    plantseed = FetchPlantSEEDImpl()
+    plantseed_reactions = plantseed.fetch_reactions(PS_Roles)
+
+    plantseed_features = plantseed.fetch_features(PS_Roles)
 
     # Cross-checking plantseed functional annotation with that originally used by OrthoFinder
     PS_Annotation_File = '/Data/PlantSEED_v3/Functional_Annotation/Arabidopsis_Family_Curation.txt'

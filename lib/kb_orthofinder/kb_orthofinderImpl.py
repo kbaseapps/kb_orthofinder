@@ -5,6 +5,7 @@ import glob
 import os
 import re
 import uuid
+import json
 import shutil
 import subprocess
 import itertools
@@ -350,9 +351,14 @@ class kb_orthofinder:
                 line=line.strip()
                 Ignored_Curation[line]=1
 
-        #Parse PlantSEED families and annotation
+        # Fetch and Parse PlantSEED families and annotation
+        with open(os.path.join("/kb/module/PlantSEED",
+                               "Data/PlantSEED_v3",
+                               "PlantSEED_Roles.json")) as plsd_fh:
+            PS_Roles = json.load(plsd_fh)
+
         plantseed = FetchPlantSEEDImpl()
-        plantseed_curation = plantseed.fetch_features()
+        plantseed_curation = plantseed.fetch_features(PS_Roles)
 
         self.log("Collecting PlantSEED Curated Functions")
         PlantSEED_Roles=dict()
@@ -481,7 +487,6 @@ class kb_orthofinder:
         annotate_fh.close()
 
         with open("/kb/module/work/tmp/annotation_output.json","w") as fh:
-            import json
             json.dump(functions_dict, fh)
             fh.close()
 
@@ -536,7 +541,6 @@ class kb_orthofinder:
 
         #Save genome
         with open("/kb/module/work/tmp/annotated_genome.json","w") as fh:
-            import json
             json.dump(plant_genome, fh)
             fh.close()
 

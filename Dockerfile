@@ -42,6 +42,9 @@ RUN git clone https://github.com/samseaver/pygrace.git && \
     cd pygrace && \
     mv PyGrace /kb/deployment/lib/PyGrace
 
+# Loading PlantSEED data
+RUN git clone -b kbase_release https://github.com/ModelSEED/PlantSEED /kb/module/PlantSEED
+
 # -----------------------------------------
 
 COPY ./ /kb/module
