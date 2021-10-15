@@ -1,6 +1,10 @@
 # kb_orthofinder release notes
 =========================================
 
+2.0.1
+-----
+* Fix in table output where predicted orthologs were listed in multiple rows
+
 2.0.0
 -----
 * Major release of kb_orthofinder
