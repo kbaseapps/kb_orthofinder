@@ -54,11 +54,12 @@ class GenerateTableImpl:
             for family in functions[function]:
                 for ortholog in sorted(functions[function][family]['orthologs']):
 
-                    hit_list=dict()
+                    hit_dict=dict()
                     for hit in functions[function][family]['hits']:
-                        hit_list[hit['feature']]=hit['ortholog']
+                        hit_dict[hit['feature']]=hit['ortholog']
 
                     cls_list=list()
+                    hit_list=list()
                     for cls_ftr in functions[function][family]['cluster'].keys():
                         for cls_olg in functions[function][family]['cluster'][cls_ftr]:
                             if(cls_olg == ortholog):
@@ -68,9 +69,10 @@ class GenerateTableImpl:
                                 seqid = "{0:.2f}".format(float(seqid))
 
                                 ftr_seqid_str = cls_ftr+":"+seqid
-                                if(cls_ftr in hit_list and ortholog == hit_list[cls_ftr]):
+                                if(cls_ftr in hit_dict and ortholog == hit_dict[cls_ftr]):
                                     # color red
                                     ftr_seqid_str = "<font color=\"red\">"+ftr_seqid_str+"</font>"
+                                    hit_list.append(cls_ftr)
                                 elif(cls_ftr in family_hit_dict[family]):
                                      # color light blue
                                      ftr_seqid_str = "<font color=\"light blue\">"+ftr_seqid_str+"</font>"
