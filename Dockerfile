@@ -6,7 +6,7 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-RUN apt-get update && apt-get install -y wget
+RUN apt-get update && apt-get upgrade -y && apt-get install -y wget
 
 RUN conda install -c conda-forge phantomjs
 
