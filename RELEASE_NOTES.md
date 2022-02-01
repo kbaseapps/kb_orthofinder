@@ -1,6 +1,13 @@
 # kb_orthofinder release notes
 =========================================
 
+2.1.1
+-----
+* Major bug fix to handle possible missing links between features,
+  mrnas, and cdss in genome object.
+* Expansion of testing configuration to make it easier to iterate on a
+  single large genome.
+
 2.0.1
 -----
 * Fix in table output where predicted orthologs were listed in multiple rows
