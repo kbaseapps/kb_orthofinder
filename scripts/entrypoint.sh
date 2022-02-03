@@ -13,8 +13,8 @@ if [ $# -eq 0 ] ; then
 elif [ "${1}" = "test" ] ; then
   echo "Initializing test data"
   TEST_DATA=$(grep ^test_data ./deploy.cfg | awk '{print $3}')
-  mkdir -p /kb/module/work/tmp/test_data
-  cd /kb/module/work/tmp/test_data
+  mkdir -p /kb/module/work/test_data
+  cd /kb/module/work/test_data
   if [ -d ${TEST_DATA} ] && [ -f ${TEST_DATA}/SpeciesIDs.txt ] ; then
       echo "Test data already present, skipping initialization"
   else
