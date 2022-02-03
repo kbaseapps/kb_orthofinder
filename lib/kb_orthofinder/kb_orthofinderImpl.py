@@ -523,49 +523,55 @@ class kb_orthofinder:
             if(ftr['id'] in annotated_features_dict):
                 ftr['functions']=[annotated_features_dict[ftr['id']]]
 
-            # Add annotation to transcripts
-            # As the Phytozome genomes have CDSs, the features don't usually get annotated here
-            for mrna in ftr['mrnas']:
+            # It is possible that a gene is listed without an associated transcript
+            if('mrnas' in ftr):
+                
+                # Add annotation to transcripts
+                # As the Phytozome genomes have CDSs, the features don't usually get annotated here
+                for mrna in ftr['mrnas']:
 
-                # Retrieve mrna object
-                mrna_indice = parent_transcript_index[mrna]
-                mrna_obj = plant_genome['data']['mrnas'][mrna_indice]
+                    # Retrieve mrna object
+                    mrna_indice = parent_transcript_index[mrna]
+                    mrna_obj = plant_genome['data']['mrnas'][mrna_indice]
 
-                # Annotate mRNA with feature annotation
-                mrna_obj['functions'] = [ftr['functions'][0]]
+                    # Annotate mRNA with feature annotation
+                    mrna_obj['functions'] = [ftr['functions'][0]]
 
-                # If it happens that the mRNA is independently annotated
-                if(mrna in annotated_features_dict):
-                    mrna_obj['functions'] = [annotated_features_dict[mrna]]
+                    # If it happens that the mRNA is independently annotated
+                    if(mrna in annotated_features_dict):
+                        mrna_obj['functions'] = [annotated_features_dict[mrna]]
 
-                    # Then annotate parent feature gene
-                    ftr['functions']=[annotated_features_dict[mrna]]
+                        # Then annotate parent feature gene
+                        ftr['functions']=[annotated_features_dict[mrna]]
+                        
+            # It is possible that a gene is listed without an associated protein
+            if('cdss' in ftr):
 
-            # Add annotation to proteins
-            # As the Phytozome genomes have CDSs, the features and mrnas get annotated here
-            for cds in ftr['cdss']:
+                # Add annotation to proteins
+                # As the Phytozome genomes have CDSs, the features and mrnas get annotated here
+                for cds in ftr['cdss']:
 
-                # Retrieve cds object
-                cds_indice = child_cds_index[cds]
-                cds_obj = plant_genome['data']['cdss'][cds_indice]
+                    # Retrieve cds object
+                    cds_indice = child_cds_index[cds]
+                    cds_obj = plant_genome['data']['cdss'][cds_indice]
 
-                # Annotate CDS with feature annotation
-                cds_obj['functions'] = [ftr['functions'][0]]
+                    # Annotate CDS with feature annotation
+                    cds_obj['functions'] = [ftr['functions'][0]]
 
-                # If it happens that the CDS is independently annotated
-                # Which is most likely event if using Phytozome genomes
-                if(cds in annotated_features_dict):
-                    cds_obj['functions'] = [annotated_features_dict[cds]]
+                    # If it happens that the CDS is independently annotated
+                    # Which is most likely event if using Phytozome genomes
+                    if(cds in annotated_features_dict):
+                        cds_obj['functions'] = [annotated_features_dict[cds]]
 
-                    if('parent_mrna' in cds_obj):
-                        parent_transcript_indice = parent_transcript_index[cds_obj['parent_mrna']]
-                        parent_transcript_obj = plant_genome['data']['mrnas'][parent_transcript_indice]
-                        parent_transcript_obj['functions'] = [annotated_features_dict[cds]]
-                    else:
-                        self.log("WARNING: CDS "+cds+" missing parent_mrna")
+                        if('parent_mrna' in cds_obj):
+                            parent_transcript_indice = parent_transcript_index[cds_obj['parent_mrna']]
+                            parent_transcript_obj = plant_genome['data']['mrnas'][parent_transcript_indice]
+                            parent_transcript_obj['functions'] = [annotated_features_dict[cds]]
+                        else:
+                            self.log("WARNING: CDS "+cds+" missing parent_mrna")
 
-                    # Then annotate parent feature gene
-                    ftr['functions']=[annotated_features_dict[cds]]
+                        # Then annotate parent feature gene
+                        ftr['functions']=[annotated_features_dict[cds]]
 
         #Save genome
         with open("/kb/module/work/tmp/annotated_genome.json","w") as fh:
