@@ -11,26 +11,29 @@ fi
 if [ $# -eq 0 ] ; then
   sh ./scripts/start_server.sh
 elif [ "${1}" = "test" ] ; then
-  echo "Initializing test data"
-  TEST_DATA=$(grep ^test_data ./deploy.cfg | awk '{print $3}')
-  mkdir -p /kb/module/work/test_data
-  cd /kb/module/work/test_data
-  if [ -d ${TEST_DATA} ] && [ -f ${TEST_DATA}/SpeciesIDs.txt ] ; then
+  TESTING=$(grep ^testing ./deploy.cfg | awk '{print $3}')
+  if [ "${TESTING}" = "1" ] ; then
+    echo "Initializing test data"
+    TEST_DATA=$(grep ^test_data ./deploy.cfg | awk '{print $3}')
+    mkdir -p /kb/module/work/test_data
+    cd /kb/module/work/test_data
+    if [ -d ${TEST_DATA} ] && [ -f ${TEST_DATA}/SpeciesIDs.txt ] ; then
       echo "Test data already present, skipping initialization"
-  else
+    else
       PROTEIN_FAMILY_FILE="${TEST_DATA}.tar.gz"
       if ! [ -f ${PROTEIN_FAMILY_FILE} ] ; then
-	  echo "Fetching ${PROTEIN_FAMILY_FILE}"
-	  wget https://web.cels.anl.gov/~seaver/KBase_App_Files/${PROTEIN_FAMILY_FILE}
+	echo "Fetching ${PROTEIN_FAMILY_FILE}"
+	wget https://web.cels.anl.gov/~seaver/KBase_App_Files/${PROTEIN_FAMILY_FILE}
       fi
       echo "Gunzipping ${PROTEIN_FAMILY_FILE}"
       tar -zxf $PROTEIN_FAMILY_FILE
       if [ -f ${TEST_DATA}/SpeciesIDs.txt ] ; then
-	  echo "Test data initialized"
+	echo "Test data initialized"
       else
-	  echo "Test data initialization failed"
-	  exit 1
+	echo "Test data initialization failed"
+	exit 1
       fi
+    fi
   fi
   echo "Running Tests"
   cd /kb/module
