@@ -113,20 +113,23 @@ class kb_orthofinderTest(unittest.TestCase):
         # Load Fake Genome
         self.loadFakeGenome()
 
-        # DFU hangs on the large archive so we changed it so it's done
-        # during test initialization in scripts/entrypoint.sh
-        # self.tr_path = os.path.join("/kb", "module", "data", self.test_data+'.tar.gz')
-        # self.dfu.unpack_file({'file_path' : self.tr_path})
-        tr_path = os.path.join("/kb", "module", "data", self.test_data)
-
         # These values are for the original test case
         input_ws = self.getWsName()
         input_genome = self.genome
-        
-        ret = self.getImpl().annotate_plant_transcripts(self.getContext(), {'input_ws' : input_ws,
-                                                                            'input_genome' : input_genome,
-                                                                            'families_path' : tr_path,
-                                                                            'threshold' : 0.55})
+
+        input_params = {'input_ws' : input_ws,
+                        'input_genome' : input_genome,
+                        'threshold' : 0.55}
+
+        if(self.cfg['testing'] == 1):
+            # DFU hangs on the large archive so we changed it so it's done
+            # during test initialization in scripts/entrypoint.sh
+            # self.tr_path = os.path.join("/kb", "module", "data", self.test_data+'.tar.gz')
+            # self.dfu.unpack_file({'file_path' : self.tr_path})
+            tr_path = os.path.join("/kb", "module", "data", self.test_data)
+            input_params['families_path'] = tr_path
+
+        ret = self.getImpl().annotate_plant_transcripts(self.getContext(), input_params)
 
         print("RESULT: ",ret[0])
         self.assertEqual(ret[0]['transcripts'],1449)
