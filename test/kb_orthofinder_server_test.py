@@ -93,12 +93,6 @@ class kb_orthofinderTest(unittest.TestCase):
         cls.fa_path = os.path.join(cls.scratch, cls.fa_filename)
         shutil.copy(os.path.join("/kb", "module", "data", cls.fa_filename), cls.fa_path)
 
-        cls.tr_filename = cls.test_data+'.tar.gz'
-        cls.tr_path = os.path.join("/kb", "module", "data", cls.tr_filename)
-        # cls.tr_path = os.path.join(cls.scratch, cls.tr_filename)
-        # This is now copied and unarchived in scripts/entrypoint.sh for the Results
-        # shutil.copy(os.path.join("/kb", "module", "data", cls.tr_filename), cls.tr_path)
-
     def loadFakeGenome(cls):
         
         input_params = {
@@ -119,29 +113,29 @@ class kb_orthofinderTest(unittest.TestCase):
         # Load Fake Genome
         self.loadFakeGenome()
 
-        # DFU hangs on the large archive so we changed it so it's done
-        # during test initialization in scripts/entrypoint.sh
-        # self.dfu.unpack_file({'file_path' : self.tr_path})
-        unpacked_tr = self.tr_path.replace('.tar.gz','')
-
-        # The commented out values are for testing a large and close relative
-        # input_ws = "seaver:narrative_1538440679496"
-        # input_genome = "Brassica_rapa"
-
         # These values are for the original test case
         input_ws = self.getWsName()
         input_genome = self.genome
-        
-        ret = self.getImpl().annotate_plant_transcripts(self.getContext(), {'input_ws' : input_ws,
-                                                                            'input_genome' : input_genome,
-                                                                            'families_path' : unpacked_tr,
-                                                                            'threshold' : 0.55})
+
+        input_params = {'input_ws' : input_ws,
+                        'input_genome' : input_genome,
+                        'threshold' : 0.55}
+
+        if(self.cfg['testing'] == 1):
+            # DFU hangs on the large archive so we changed it so it's done
+            # during test initialization in scripts/entrypoint.sh
+            # self.tr_path = os.path.join("/kb", "module", "data", self.test_data+'.tar.gz')
+            # self.dfu.unpack_file({'file_path' : self.tr_path})
+            tr_path = os.path.join("/kb", "module", "data", self.test_data)
+            input_params['families_path'] = tr_path
+
+        ret = self.getImpl().annotate_plant_transcripts(self.getContext(), input_params)
 
         print("RESULT: ",ret[0])
-        self.assertEqual(ret[0]['transcripts'],1443)
-        self.assertEqual(ret[0]['alignments'],1204)
+        self.assertEqual(ret[0]['transcripts'],1449)
+        self.assertEqual(ret[0]['alignments'],1427)
         self.assertEqual(ret[0]['ftrs'],975)
-        self.assertEqual(ret[0]['fns'],819)
-        self.assertEqual(ret[0]['hit_ftrs'],63)
-        self.assertEqual(ret[0]['hit_fns'],38)
+        self.assertEqual(ret[0]['fns'],824)
+        self.assertEqual(ret[0]['hit_ftrs'],72)
+        self.assertEqual(ret[0]['hit_fns'],39)
         pass

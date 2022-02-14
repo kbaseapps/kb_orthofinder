@@ -207,6 +207,15 @@ class kb_orthofinder:
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.workspaceURL = config['workspace-url']
+
+        self.testing = False
+        if(config['testing'] == '1'):
+            self.testing=True
+
+        self.runOrthoFinder = True
+        if(config['run_orthofinder'] == '0'):
+            self.runOrthoFinder=False
+            
         self.token = os.environ['KB_AUTH_TOKEN']
         self.scratch = os.path.abspath(config['scratch'])
         self.callback_url = os.environ['SDK_CALLBACK_URL']
@@ -278,16 +287,15 @@ class kb_orthofinder:
         #Reference data is considered immutable but each run modifies results within the directory
         #So here, we copy the reference data directory into scratch
         #The first if condition is for testing purposes
-        family_file_path = ""
-        testing = False
-        if('families_path' in input and os.path.isdir(input['families_path'])):
-            family_file_path = input['families_path']
+
+        uuid_string = str(uuid.uuid4())
+        family_file_path=os.path.join(self.scratch,uuid_string,"Reference_Results")
+
+        if(self.testing is True):
+            if('families_path' in input and os.path.isdir(input['families_path'])):
+                family_file_path = input['families_path']
             self.log("Testing Reference Families at "+family_file_path)
-            if("Result" in family_file_path):
-                testing = True
         else:
-            uuid_string = str(uuid.uuid4())
-            family_file_path=os.path.join(self.scratch,uuid_string,"Reference_Results")
             self.log("Copying Reference Families to "+family_file_path)
             shutil.copytree("/data/OrthoFinder_Phytozome_Reference",family_file_path)
 
@@ -297,13 +305,19 @@ class kb_orthofinder:
         protein_fasta_file = os.path.join(fasta_file_path,temp_genome_name+".fa")
         self.log("Printing protein sequences to file: "+protein_fasta_file)
 
+        testing_count = 200
         with open(protein_fasta_file,'w') as fasta_handle:
             #Code plagarized from https://github.com/biopython/biopython/blob/master/Bio/SeqIO/FastaIO.py
             for seq_id in sequences_dict:
+                #printing smaller set for testing purposes
+                if(self.testing is True):
+                    testing_count = testing_count -1
                 fasta_handle.write(">"+seq_id+"\n")
                 for i in range(0, len(sequences_dict[seq_id]), 80):
                     fasta_handle.write(sequences_dict[seq_id][i:i+80]+"\n")
-
+                if(testing_count==0):
+                    break
+                
         #Building command
         command = "/kb/deployment/bin/orthofinder/orthofinder.py "
         #Software
@@ -321,7 +335,7 @@ class kb_orthofinder:
 
         #####################################################
         output_files=list()
-        if(testing is False):
+        if(self.testing is False or self.runOrthoFinder is True):
             self.log("Running OrthoFinder command: "+command)
 
             pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
@@ -503,41 +517,61 @@ class kb_orthofinder:
 
         self.log("Populating plant genome with newly clustered functions")
         # Add annotation to protein-coding genes
-        # As the phytozome genomes have CDSs, the features don't usually get annotated here
+        # As the Phytozome genomes have CDSs, the features don't usually get annotated here
         for ftr in plant_genome['data']['features']:
             ftr['functions']=["Unannotated"]
             if(ftr['id'] in annotated_features_dict):
                 ftr['functions']=[annotated_features_dict[ftr['id']]]
 
-        # Add annotation to transcripts
-        # As the phytozome genomes have CDSs, the features don't usually get annotated here
-        for mrna in plant_genome['data']['mrnas']:
-            mrna['functions']=["Unannotated"]
-            if(mrna['id'] in annotated_features_dict):
-                mrna['functions']=[annotated_features_dict[mrna['id']]]
-
-                # Annotate parent feature gene
-                plant_genome['data']['features'][parent_feature_index[mrna['parent_gene']]]['functions']=[annotated_features_dict[mrna['id']]]
-            elif(mrna['parent_gene'] in annotated_features_dict):
-                mrna['functions']=[annotated_features_dict[mrna['parent_gene']]]
-
-        # Add annotation to proteins
-        # As the phytozome genomes have CDSs, the features and mrnas get annotated here
-        for cds in plant_genome['data']['cdss']:
-            cds['functions']=["Unannotated"]
-            if(cds['id'] in annotated_features_dict):
-                cds['functions']=[annotated_features_dict[cds['id']]]
-
-                # Annotate parent feature gene
-                plant_genome['data']['features'][parent_feature_index[cds['parent_gene']]]['functions']=[annotated_features_dict[cds['id']]]
-
-                # Annotate parent transcript
-                plant_genome['data']['mrnas'][parent_transcript_index[cds['parent_mrna']]]['functions']=[annotated_features_dict[cds['id']]]
-            elif(cds['parent_gene'] in annotated_features_dict):
-                cds['functions']=[annotated_features_dict[cds['parent_gene']]]
+            # It is possible that a gene is listed without an associated transcript
+            if('mrnas' in ftr):
                 
-                # Annotate parent transcript
-                plant_genome['data']['mrnas'][parent_transcript_index[cds['parent_mrna']]]['functions']=[annotated_features_dict[cds['parent_gene']]]
+                # Add annotation to transcripts
+                # As the Phytozome genomes have CDSs, the features don't usually get annotated here
+                for mrna in ftr['mrnas']:
+
+                    # Retrieve mrna object
+                    mrna_indice = parent_transcript_index[mrna]
+                    mrna_obj = plant_genome['data']['mrnas'][mrna_indice]
+
+                    # Annotate mRNA with feature annotation
+                    mrna_obj['functions'] = [ftr['functions'][0]]
+
+                    # If it happens that the mRNA is independently annotated
+                    if(mrna in annotated_features_dict):
+                        mrna_obj['functions'] = [annotated_features_dict[mrna]]
+
+                        # Then annotate parent feature gene
+                        ftr['functions']=[annotated_features_dict[mrna]]
+                        
+            # It is possible that a gene is listed without an associated protein
+            if('cdss' in ftr):
+
+                # Add annotation to proteins
+                # As the Phytozome genomes have CDSs, the features and mrnas get annotated here
+                for cds in ftr['cdss']:
+
+                    # Retrieve cds object
+                    cds_indice = child_cds_index[cds]
+                    cds_obj = plant_genome['data']['cdss'][cds_indice]
+
+                    # Annotate CDS with feature annotation
+                    cds_obj['functions'] = [ftr['functions'][0]]
+
+                    # If it happens that the CDS is independently annotated
+                    # Which is most likely event if using Phytozome genomes
+                    if(cds in annotated_features_dict):
+                        cds_obj['functions'] = [annotated_features_dict[cds]]
+
+                        if('parent_mrna' in cds_obj):
+                            parent_transcript_indice = parent_transcript_index[cds_obj['parent_mrna']]
+                            parent_transcript_obj = plant_genome['data']['mrnas'][parent_transcript_indice]
+                            parent_transcript_obj['functions'] = [annotated_features_dict[cds]]
+                        else:
+                            self.log("WARNING: CDS "+cds+" missing parent_mrna")
+
+                        # Then annotate parent feature gene
+                        ftr['functions']=[annotated_features_dict[cds]]
 
         #Save genome
         with open("/kb/module/work/tmp/annotated_genome.json","w") as fh:
@@ -547,17 +581,20 @@ class kb_orthofinder:
         if('output_genome' not in input):
             input['output_genome']=input['input_genome']
 
-        #wsid = self.dfu.ws_name_to_id(input['input_ws'])
-        #save_result = self.dfu.save_objects({'id':wsid,'objects':[{'name':input['output_genome'],
-        #                                                           'data':plant_genome['data'],
-        #                                                           'type':'KBaseGenomes.Genome'}]})[0]
-        
-        save_result = self.gfu.save_one_genome({'workspace' : input['input_ws'],
-                                                'name' : input['output_genome'],
-                                                'data' : plant_genome['data']})['info'];
+        saved_genome=""
+        if(self.testing is True):
+            #wsid = self.dfu.ws_name_to_id(input['input_ws'])
+            #save_result = self.dfu.save_objects({'id':wsid,'objects':[{'name':input['output_genome'],
+            #                                                           'data':plant_genome['data'],
+            #                                                           'type':'KBaseGenomes.Genome'}]})[0]
+            pass
+        else:
+            save_result = self.gfu.save_one_genome({'workspace' : input['input_ws'],
+                                                    'name' : input['output_genome'],
+                                                    'data' : plant_genome['data']})['info'];
 
-        #reference of saved genome
-        saved_genome = "{}/{}/{}".format(save_result[6],save_result[0],save_result[4])
+            #reference of saved genome
+            saved_genome = "{}/{}/{}".format(save_result[6],save_result[0],save_result[4])
 
         Annotated_Roles=dict()
         for curation in found_annotations:
@@ -686,9 +723,11 @@ class kb_orthofinder:
         report_params = { 'direct_html_link_index' : 0, #Use to refer to index of 'html_links'
                           'workspace_name' : input['input_ws'],
                           'report_object_name' : 'kb_orthofinder_' + uuid_string,
-                          'objects_created' : [{"ref":saved_genome,"description":description}],
                           'file_links' : output_files,
                           'html_links' : html_report_list}
+
+        if(self.testing is False):
+            report_params['objects_created']=[{"ref":saved_genome,"description":description}]
 
         kbase_report_client = KBaseReport(self.callback_url, token=self.token)
         report_client_output = kbase_report_client.create_extended_report(report_params)
