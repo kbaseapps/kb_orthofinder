@@ -65,7 +65,7 @@ class kb_orthofinder:
                 Data[group].append((x,y))
         fig_gen = GenerateFigure(Data)
 
-        uuid_string = str(uuid.uuid4())
+        uuid_string = "generate_figure_"+str(uuid.uuid4())
         figure_data_file_path=os.path.join(self.scratch,uuid_string)
         os.mkdir(figure_data_file_path)
         fig_gen.generate_figure(figure_path=figure_data_file_path,data_point=params)
@@ -76,6 +76,7 @@ class kb_orthofinder:
         print(('\n' if prefix_newline else '') + time_str + ': ' + message)
 
     def compute_clusters(self, cluster):
+
         features = sorted(cluster.keys())
         clustered_sequences=dict()
         for i in range(len(features)-1):
@@ -277,10 +278,19 @@ class kb_orthofinder:
         if(len(sequences_dict)==0):
             raise Exception("The genome does not contain any protein sequences!")
 
+        # We have a problem with how OrthoFinder arbitrarily replaces 'special' characters in identifiers:
+        # https://github.com/davidemms/OrthoFinder/blob/master/scripts_of/util.py#L181
+        # without 'hacking' the OF code, here I'm trying to anticipate how OF may have changed the identifier
+
+        alt_seq_ids_dict=dict()
+        for og_id in sequences_dict:
+            of_id = og_id.replace(":", "_").replace(",", "_").replace("(", "_").replace(")", "_")
+            alt_seq_ids_dict[of_id]=og_id
+
         output['ftrs'] = len(sequences_dict.keys())
 
         #Create directory for storing new fasta file
-        uuid_string = str(uuid.uuid4())
+        uuid_string = "print_fasta_"+str(uuid.uuid4())
         fasta_file_path=os.path.join(self.scratch,uuid_string)
         os.mkdir(fasta_file_path)
 
@@ -288,20 +298,21 @@ class kb_orthofinder:
         #So here, we copy the reference data directory into scratch
         #The first if condition is for testing purposes
 
-        uuid_string = str(uuid.uuid4())
-        family_file_path=os.path.join(self.scratch,uuid_string,"Reference_Results")
+        uuid_string = "family_data_"+str(uuid.uuid4())
+        family_file_path=os.path.join(self.scratch,uuid_string)
 
         if(self.testing is True):
             if('families_path' in input and os.path.isdir(input['families_path'])):
-                family_file_path = input['families_path']
-            self.log("Testing Reference Families at "+family_file_path)
+                #family_file_path = input['families_path']
+                self.log("Copying Test Families at "+family_file_path)
+                shutil.copytree(input['families_path'],family_file_path)
         else:
             self.log("Copying Reference Families to "+family_file_path)
             shutil.copytree("/data/OrthoFinder_Phytozome_Reference",family_file_path)
 
         #The fasta file must have a random name to avoid _any_ clashes
         #This will need to be replaced in the newick file
-        temp_genome_name = str(uuid.uuid4())
+        temp_genome_name = "protein_fasta_"+str(uuid.uuid4())
         protein_fasta_file = os.path.join(fasta_file_path,temp_genome_name+".fa")
         self.log("Printing protein sequences to file: "+protein_fasta_file)
 
@@ -319,7 +330,7 @@ class kb_orthofinder:
                     break
                 
         #Building command
-        command = "/kb/deployment/bin/orthofinder/orthofinder.py "
+        command = "/usr/bin/orthofinder/orthofinder.py "
         #Software
         command +="-S diamond -M msa -A mafft -T fasttree "
         # No. of Threads
@@ -415,6 +426,10 @@ class kb_orthofinder:
                 except:
                     transcript_id = header
                     transcript_description = None
+
+                # anticipating if OF changed characters in ids, see above
+                if(transcript_id in alt_seq_ids_dict):
+                    transcript_id = alt_seq_ids_dict[transcript_id]
 
                 #skip un-necessary proteins to reduce computation time
                 if("Athaliana" not in transcript_id and transcript_id not in sequences_dict):
@@ -616,7 +631,7 @@ class kb_orthofinder:
         fraction_plantseed = float( (float(len(Annotated_Roles.keys())) / float(len(PlantSEED_Roles.keys()))) )
 
         # HTML Folder Path
-        uuid_string = str(uuid.uuid4())
+        uuid_string = "generate_report_"+str(uuid.uuid4())
         html_file_path=os.path.join(self.scratch,uuid_string)
         os.mkdir(html_file_path)
 
@@ -729,10 +744,10 @@ class kb_orthofinder:
         if(self.testing is False):
             report_params['objects_created']=[{"ref":saved_genome,"description":description}]
 
-        kbase_report_client = KBaseReport(self.callback_url, token=self.token)
-        report_client_output = kbase_report_client.create_extended_report(report_params)
-        output['report_name']=report_client_output['name']
-        output['report_ref']=report_client_output['ref']
+            kbase_report_client = KBaseReport(self.callback_url, token=self.token)
+            report_client_output = kbase_report_client.create_extended_report(report_params)
+            output['report_name']=report_client_output['name']
+            output['report_ref']=report_client_output['ref']
 
         #END annotate_plant_transcripts
 
