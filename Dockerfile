@@ -1,4 +1,4 @@
-FROM kbase/sdkbase2:python
+FROM kbase/sdkpython:3.8.10
 MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
@@ -27,7 +27,6 @@ RUN apt-get install -y mafft && \
     mafft --version
     
 RUN apt-get install -y fasttree && \
-    ln -s /usr/bin/fasttree /usr/bin/FastTree && \
     FastTree -expert
 
 RUN mkdir -p /kb/deps
@@ -35,12 +34,12 @@ WORKDIR /kb/deps
 
 RUN wget --quiet https://github.com/davidemms/OrthoFinder/releases/download/2.5.2/OrthoFinder_source.tar.gz && \
     tar -zxf OrthoFinder_source.tar.gz && \
-    mv OrthoFinder_source /kb/deployment/bin/orthofinder
+    mv OrthoFinder_source /usr/bin/orthofinder
 
 # Using a fork with fixes for Python 3
 RUN git clone https://github.com/samseaver/pygrace.git && \
     cd pygrace && \
-    mv PyGrace /kb/deployment/lib/PyGrace
+    mv PyGrace /opt/conda3/lib/python3.8/site-packages/PyGrace
 
 # Loading PlantSEED data
 RUN git clone -b kbase_release https://github.com/ModelSEED/PlantSEED /kb/module/PlantSEED
