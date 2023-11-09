@@ -1,7 +1,7 @@
 [ {
   "module_name" : "DataFileUtil",
-  "type" : "core",
-  "file_path" : "https://raw.githubusercontent.com/kbaseapps/DataFileUtil/master/DataFileUtil.spec"
+  "type" : "sdk",
+  "version_tag" : "release"
 }, {
   "module_name" : "GenomeFileUtil",
   "type" : "sdk",
