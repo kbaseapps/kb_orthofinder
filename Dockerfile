@@ -6,43 +6,8 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y wget
-
-RUN conda install -c conda-forge phantomjs
-
-RUN pip install --upgrade pip && \
-    pip install scipy && \
-    pip install bokeh && \
-    pip install selenium
-
-RUN wget --quiet https://github.com/bbuchfink/diamond/releases/download/v2.0.9/diamond-linux64.tar.gz && \
-    tar -zxf diamond-linux64.tar.gz diamond && \
-    mv diamond /usr/bin/diamond && \
-    diamond version
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y grace && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y mcl
-
-RUN apt-get install -y mafft && \
-    mafft --version
-    
-RUN apt-get install -y fasttree && \
-    FastTree -expert
-
-RUN mkdir -p /kb/deps
-WORKDIR /kb/deps
-
-RUN wget --quiet https://github.com/davidemms/OrthoFinder/releases/download/2.5.2/OrthoFinder_source.tar.gz && \
-    tar -zxf OrthoFinder_source.tar.gz && \
-    mv OrthoFinder_source /usr/bin/orthofinder
-
-# Using a fork with fixes for Python 3
-RUN git clone https://github.com/samseaver/pygrace.git && \
-    cd pygrace && \
-    mv PyGrace /opt/conda3/lib/python3.8/site-packages/PyGrace
-
-# Loading PlantSEED data
-RUN git clone -b kbase_release https://github.com/ModelSEED/PlantSEED /kb/module/PlantSEED
+COPY scripts/install_dependencies.sh /kb/module/scripts/
+RUN /kb/module//scripts/install_dependencies.sh
 
 # -----------------------------------------
 
