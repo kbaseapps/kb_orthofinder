@@ -209,9 +209,9 @@ class kb_orthofinder:
         #BEGIN_CONSTRUCTOR
         self.workspaceURL = config['workspace-url']
 
-        self.testing = False
-        if config['testing'] == '1':
-            self.testing=True
+        self.skip_refdata = False
+        if config['skip_refdata'] == '1':
+            self.skip_refdata=True
 
         self.runOrthoFinder = True
         if config['run_orthofinder'] == '0':
@@ -240,6 +240,11 @@ class kb_orthofinder:
         #BEGIN annotate_plant_transcripts
 
         output = dict()
+
+        #Create directory for storing temporary files
+        uuid_string = str(uuid.uuid4())
+        uuid_file_path=os.path.join(self.scratch,uuid_string)
+        os.mkdir(uuid_file_path)
 
         # Retrieve plant genome
         self.log("Fetching plant genome: "+input['input_ws']+'/'+input['input_genome'])
@@ -289,25 +294,24 @@ class kb_orthofinder:
 
         output['ftrs'] = len(sequences_dict.keys())
 
-        #Create directory for storing new fasta file
-        uuid_string = "print_fasta_"+str(uuid.uuid4())
-        fasta_file_path=os.path.join(self.scratch,uuid_string)
-        os.mkdir(fasta_file_path)
-
         #Reference data is considered immutable but each run modifies results within the directory
         #So here, we copy the reference data directory into scratch
         #The first if condition is for testing purposes
+        family_file_path=os.path.join(uuid_file_path,"family_data")
 
-        uuid_string = "family_data_"+str(uuid.uuid4())
-        family_file_path=os.path.join(self.scratch,uuid_string)
-
-        if self.testing is True:
+        if self.skip_refdata:
             if 'families_path' in input and os.path.isdir(input['families_path']):
                 self.log("Copying Test Families at "+family_file_path)
                 shutil.copytree(input['families_path'],family_file_path)
         else:
             self.log("Copying Reference Families to "+family_file_path)
             shutil.copytree("/data/OrthoFinder_Phytozome_Reference",family_file_path)
+
+        # Create directory for storing new fasta file
+        # This has to be a fresh directory for OrthoFinder
+        # to find and integrate the fasta file
+        fasta_file_path=os.path.join(uuid_file_path,"protein_fasta")
+        os.mkdir(fasta_file_path)
 
         #The fasta file must have a random name to avoid _any_ clashes
         #This will need to be replaced in the newick file
@@ -320,7 +324,7 @@ class kb_orthofinder:
             #Code plagarized from https://github.com/biopython/biopython/blob/master/Bio/SeqIO/FastaIO.py
             for seq_id in sequences_dict:
                 #printing smaller set for testing purposes
-                if self.testing is True:
+                if self.skip_refdata:
                     testing_count = testing_count -1
                 fasta_handle.write(">"+seq_id+"\n")
                 for i in range(0, len(sequences_dict[seq_id]), 80):
@@ -345,7 +349,7 @@ class kb_orthofinder:
 
         #####################################################
         output_files=list()
-        if self.testing is False or self.runOrthoFinder is True:
+        if self.skip_refdata is False or self.runOrthoFinder is True:
             self.log("Running OrthoFinder command: "+command)
 
             pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
@@ -596,11 +600,13 @@ class kb_orthofinder:
             input['output_genome']=input['input_genome']
 
         saved_genome=""
-        if self.testing is True:
-            #wsid = self.dfu.ws_name_to_id(input['input_ws'])
-            #save_result = self.dfu.save_objects({'id':wsid,'objects':[{'name':input['output_genome'],
-            #                                                           'data':plant_genome['data'],
-            #                                                           'type':'KBaseGenomes.Genome'}]})[0]
+        if self.skip_refdata is True:
+            # I keep this commented code here just in case I need to debug 
+            # how a genome is saved when testing without refdata
+            # wsid = self.dfu.ws_name_to_id(input['input_ws'])
+            # save_result = self.dfu.save_objects({'id':wsid,'objects':[{'name':input['output_genome'],
+            #                                                            'data':plant_genome['data'],
+            #                                                            'type':'KBaseGenomes.Genome'}]})[0]
             pass
         else:
             save_result = self.gfu.save_one_genome({'workspace' : input['input_ws'],
@@ -630,8 +636,7 @@ class kb_orthofinder:
         fraction_plantseed = float( (float(len(Annotated_Roles.keys())) / float(len(PlantSEED_Roles.keys()))) )
 
         # HTML Folder Path
-        uuid_string = "generate_report_"+str(uuid.uuid4())
-        html_file_path=os.path.join(self.scratch,uuid_string)
+        html_file_path=os.path.join(uuid_file_path,"generate_report")
         os.mkdir(html_file_path)
 
         # Generate figure: 
@@ -740,7 +745,7 @@ class kb_orthofinder:
                           'file_links' : output_files,
                           'html_links' : html_report_list}
 
-        if self.testing is False:
+        if self.skip_refdata is False:
             report_params['objects_created']=[{"ref":saved_genome,"description":description}]
 
             kbase_report_client = KBaseReport(self.callback_url, token=self.token)

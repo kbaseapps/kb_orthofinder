@@ -121,7 +121,7 @@ class kb_orthofinderTest(unittest.TestCase):
                         'input_genome' : input_genome,
                         'threshold' : 0.55}
 
-        if(self.cfg['testing'] == '1'):
+        if(self.cfg['skip_refdata'] == '1'):
             # DFU hangs on the large archive so we changed it so it's done
             # during test initialization in scripts/entrypoint.sh
             # self.tr_path = os.path.join("/kb", "module", "data", self.test_data+'.tar.gz')
@@ -140,4 +140,3 @@ class kb_orthofinderTest(unittest.TestCase):
         self.assertEqual(ret[0]['fns'],824)
         self.assertEqual(ret[0]['hit_ftrs'],12)
         self.assertEqual(ret[0]['hit_fns'],9)
-        pass
