@@ -52,11 +52,11 @@ class kb_orthofinderTest(unittest.TestCase):
         cls.serviceImpl = kb_orthofinder(cls.cfg)
         cls.scratch = cls.cfg['scratch']
 
-        cls.testing = False
+        cls.skip_refdata = False
         cls.test_data = "OrthoFinder_Phytozome_Reference"
         
-        if(cls.cfg['testing']=="1"):
-            cls.testing = True
+        if(cls.cfg['skip_refdata']=="1"):
+            cls.skip_refdata = True
             cls.test_data = cls.cfg['test_data']
             
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
@@ -84,7 +84,7 @@ class kb_orthofinderTest(unittest.TestCase):
     @classmethod
     def prepare_data(cls):
 
-        if(cls.testing is False):
+        if(cls.skip_refdata is False):
             cls.gff_filename = 'Test_v1.0.gene.gff3.gz'
             cls.gff_path = os.path.join(cls.scratch, cls.gff_filename)
             shutil.copy(os.path.join("/kb", "module", "data", cls.gff_filename), cls.gff_path)

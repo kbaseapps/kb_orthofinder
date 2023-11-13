@@ -11,8 +11,8 @@ fi
 if [ $# -eq 0 ] ; then
   sh ./scripts/start_server.sh
 elif [ "${1}" = "test" ] ; then
-  TESTING=$(grep ^testing ./deploy.cfg | awk '{print $3}')
-  if [ "${TESTING}" = "1" ] ; then
+  USE_TEST_DATA=$(grep ^skip_refdata ./deploy.cfg | awk '{print $3}')
+  if [ "${USE_TEST_DATA}" = "1" ] ; then
     echo "Initializing test data"
     TEST_DATA=$(grep ^test_data ./deploy.cfg | awk '{print $3}')
     mkdir -p /kb/module/work/test_data
@@ -34,6 +34,8 @@ elif [ "${1}" = "test" ] ; then
 	exit 1
       fi
     fi
+  else
+    echo "Warning: Running tests without initializing test data!"
   fi
   echo "Running Tests"
   cd /kb/module
