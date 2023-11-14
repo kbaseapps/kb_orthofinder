@@ -121,21 +121,22 @@ class kb_orthofinderTest(unittest.TestCase):
                         'input_genome' : input_genome,
                         'threshold' : 0.55}
 
-        if(self.cfg['testing'] == 1):
+        if(self.cfg['skip_refdata'] == '1'):
             # DFU hangs on the large archive so we changed it so it's done
             # during test initialization in scripts/entrypoint.sh
             # self.tr_path = os.path.join("/kb", "module", "data", self.test_data+'.tar.gz')
             # self.dfu.unpack_file({'file_path' : self.tr_path})
-            tr_path = os.path.join("/kb", "module", "data", self.test_data)
+            tr_path = os.path.join("/kb", "module", "work", "test_data", self.test_data)
             input_params['families_path'] = tr_path
 
         ret = self.getImpl().annotate_plant_transcripts(self.getContext(), input_params)
 
-        print("RESULT: ",ret[0])
+        print("\nRESULT: ",ret[0])
+	# from Test_Reference (and not Test_Result_Reference)
+	# RESULT:  {'ftrs': 975, 'fns': 824, 'transcripts': 1449, 'alignments': 1221, 'hit_fns': 9, 'hit_ftrs': 12, 'cur_roles': 594, 'hit_roles': 8}
         self.assertEqual(ret[0]['transcripts'],1449)
-        self.assertEqual(ret[0]['alignments'],1427)
+        self.assertEqual(ret[0]['alignments'],1221)
         self.assertEqual(ret[0]['ftrs'],975)
         self.assertEqual(ret[0]['fns'],824)
-        self.assertEqual(ret[0]['hit_ftrs'],72)
-        self.assertEqual(ret[0]['hit_fns'],39)
-        pass
+        self.assertEqual(ret[0]['hit_ftrs'],12)
+        self.assertEqual(ret[0]['hit_fns'],9)

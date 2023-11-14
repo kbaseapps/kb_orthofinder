@@ -1,6 +1,12 @@
 # kb_orthofinder release notes
 =========================================
 
+2.1.2
+-----
+* OrthoFinder will replace a few special characters within the protein
+  ids with the underscore character, so this fix will make sure that 
+  the original protein ids can be retrieved.
+
 2.1.1
 -----
 * Major bug fix to handle possible missing links between features,

@@ -23,15 +23,21 @@ class DataFileUtil(object):
             self, url=None, timeout=30 * 60, user_id=None,
             password=None, token=None, ignore_authrc=False,
             trust_all_ssl_certificates=False,
-            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login'):
+            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login',
+            service_ver='release',
+            async_job_check_time_ms=100, async_job_check_time_scale_percent=150, 
+            async_job_check_max_time_ms=300000):
         if url is None:
             raise ValueError('A url is required')
-        self._service_ver = None
+        self._service_ver = service_ver
         self._client = _BaseClient(
             url, timeout=timeout, user_id=user_id, password=password,
             token=token, ignore_authrc=ignore_authrc,
             trust_all_ssl_certificates=trust_all_ssl_certificates,
-            auth_svc=auth_svc)
+            auth_svc=auth_svc,
+            async_job_check_time_ms=async_job_check_time_ms,
+            async_job_check_time_scale_percent=async_job_check_time_scale_percent,
+            async_job_check_max_time_ms=async_job_check_max_time_ms)
 
     def shock_to_file(self, params, context=None):
         """
@@ -69,8 +75,8 @@ class DataFileUtil(object):
            parameter "file_path" of String, parameter "size" of Long,
            parameter "attributes" of mapping from String to unspecified object
         """
-        return self._client.call_method('DataFileUtil.shock_to_file',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.shock_to_file',
+                                    [params], self._service_ver, context)
 
     def shock_to_file_mass(self, params, context=None):
         """
@@ -108,8 +114,8 @@ class DataFileUtil(object):
            parameter "file_path" of String, parameter "size" of Long,
            parameter "attributes" of mapping from String to unspecified object
         """
-        return self._client.call_method('DataFileUtil.shock_to_file_mass',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.shock_to_file_mass',
+                                    [params], self._service_ver, context)
 
     def file_to_shock(self, params, context=None):
         """
@@ -154,23 +160,59 @@ class DataFileUtil(object):
            parameter "type" of String, parameter "remote_md5" of String,
            parameter "node_file_name" of String, parameter "size" of String
         """
-        return self._client.call_method('DataFileUtil.file_to_shock',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.file_to_shock',
+                                    [params], self._service_ver, context)
 
     def unpack_file(self, params, context=None):
         """
         Using the same logic as unpacking a Shock file, this method will cause
         any bzip or gzip files to be uncompressed, and then unpack tar and zip
-        archive files (uncompressing gzipped or bzipped archive files if 
-        necessary). If the file is an archive, it will be unbundled into the 
+        archive files (uncompressing gzipped or bzipped archive files if
+        necessary). If the file is an archive, it will be unbundled into the
         directory containing the original output file.
         :param params: instance of type "UnpackFileParams" -> structure:
            parameter "file_path" of String
         :returns: instance of type "UnpackFileResult" -> structure: parameter
            "file_path" of String
         """
-        return self._client.call_method('DataFileUtil.unpack_file',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.unpack_file',
+                                    [params], self._service_ver, context)
+
+    def unpack_files(self, params, context=None):
+        """
+        Using the same logic as unpacking a Shock file, this method will cause
+        any bzip or gzip files to be uncompressed, and then unpack tar and zip
+        archive files (uncompressing gzipped or bzipped archive files if 
+        necessary). If the file is an archive, it will be unbundled into the 
+        directory containing the original output file.
+        The ordering of the input and output files is preserved in the input and output lists.
+        :param params: instance of list of type "UnpackFilesParams" (Input
+           parameters for the unpack_files function. Required parameter:
+           file_path - the path to the file to unpack. The file will be
+           unpacked into the file's parent directory. Optional parameter:
+           unpack - either 'uncompress' or 'unpack'. 'uncompress' will cause
+           any bzip or gzip files to be uncompressed. 'unpack' will behave
+           the same way, but it will also unpack tar and zip archive files
+           (uncompressing gzipped or bzipped archive files if necessary). If
+           'uncompress' is specified and an archive file is encountered, an
+           error will be thrown. If the file is an archive, it will be
+           unbundled into the directory containing the original output file.
+           Defaults to 'unpack'. Note that if the file name (either as
+           provided by the user or by Shock) without the a decompression
+           extension (e.g. .gz, .zip or .tgz -> .tar) points to an existing
+           file and unpack is specified, that file will be overwritten by the
+           decompressed Shock file.) -> structure: parameter "file_path" of
+           String, parameter "unpack" of String
+        :returns: instance of list of type "UnpackFilesResult" (Output
+           parameters for the unpack_files function. file_path - the path to
+           either a) the unpacked file or b) in the case of archive files,
+           the path to the original archive file, possibly uncompressed, or
+           c) in the case of regular files that don't need processing, the
+           path to the input file.) -> structure: parameter "file_path" of
+           String
+        """
+        return self._client.run_job('DataFileUtil.unpack_files',
+                                    [params], self._service_ver, context)
 
     def pack_file(self, params, context=None):
         """
@@ -196,8 +238,8 @@ class DataFileUtil(object):
            pack_file function. file_path - the path to the packed file.) ->
            structure: parameter "file_path" of String
         """
-        return self._client.call_method('DataFileUtil.pack_file',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.pack_file',
+                                    [params], self._service_ver, context)
 
     def package_for_download(self, params, context=None):
         """
@@ -228,8 +270,8 @@ class DataFileUtil(object):
            "shock_id" of String, parameter "node_file_name" of String,
            parameter "size" of String
         """
-        return self._client.call_method('DataFileUtil.package_for_download',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.package_for_download',
+                                    [params], self._service_ver, context)
 
     def file_to_shock_mass(self, params, context=None):
         """
@@ -275,8 +317,8 @@ class DataFileUtil(object):
            parameter "type" of String, parameter "remote_md5" of String,
            parameter "node_file_name" of String, parameter "size" of String
         """
-        return self._client.call_method('DataFileUtil.file_to_shock_mass',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.file_to_shock_mass',
+                                    [params], self._service_ver, context)
 
     def copy_shock_node(self, params, context=None):
         """
@@ -302,8 +344,8 @@ class DataFileUtil(object):
            of String, parameter "type" of String, parameter "remote_md5" of
            String
         """
-        return self._client.call_method('DataFileUtil.copy_shock_node',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.copy_shock_node',
+                                    [params], self._service_ver, context)
 
     def own_shock_node(self, params, context=None):
         """
@@ -337,8 +379,8 @@ class DataFileUtil(object):
            of String, parameter "type" of String, parameter "remote_md5" of
            String
         """
-        return self._client.call_method('DataFileUtil.own_shock_node',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.own_shock_node',
+                                    [params], self._service_ver, context)
 
     def ws_name_to_id(self, name, context=None):
         """
@@ -346,8 +388,8 @@ class DataFileUtil(object):
         :param name: instance of String
         :returns: instance of Long
         """
-        return self._client.call_method('DataFileUtil.ws_name_to_id',
-                                        [name], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.ws_name_to_id',
+                                    [name], self._service_ver, context)
 
     def save_objects(self, params, context=None):
         """
@@ -355,7 +397,7 @@ class DataFileUtil(object):
         The objects will be sorted prior to saving to avoid the Workspace sort memory limit.
         Note that if the object contains workspace object refs in mapping keys that may cause
         the Workspace to resort the data. To avoid this, convert any refs in mapping keys to UPA
-        format (e.g. #/#/#, where # is a positive integer). 
+        format (e.g. #/#/#, where # is a positive integer).
         If the data is very large, using the WSLargeDataIO SDK module is advised.
         Saving over a deleted object undeletes it.
         :param params: instance of type "SaveObjectsParams" (Input parameters
@@ -407,8 +449,8 @@ class DataFileUtil(object):
            parameter "chsum" of String, parameter "size" of Long, parameter
            "meta" of mapping from String to String
         """
-        return self._client.call_method('DataFileUtil.save_objects',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.save_objects',
+                                    [params], self._service_ver, context)
 
     def get_objects(self, params, context=None):
         """
@@ -453,8 +495,8 @@ class DataFileUtil(object):
            parameter "chsum" of String, parameter "size" of Long, parameter
            "meta" of mapping from String to String
         """
-        return self._client.call_method('DataFileUtil.get_objects',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.get_objects',
+                                    [params], self._service_ver, context)
 
     def versions(self, context=None):
         """
@@ -462,8 +504,8 @@ class DataFileUtil(object):
         :returns: multiple set - (1) parameter "wsver" of String, (2)
            parameter "shockver" of String
         """
-        return self._client.call_method('DataFileUtil.versions',
-                                        [], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.versions',
+                                    [], self._service_ver, context)
 
     def download_staging_file(self, params, context=None):
         """
@@ -481,8 +523,8 @@ class DataFileUtil(object):
            scratch area path) -> structure: parameter "copy_file_path" of
            String
         """
-        return self._client.call_method('DataFileUtil.download_staging_file',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.download_staging_file',
+                                    [params], self._service_ver, context)
 
     def download_web_file(self, params, context=None):
         """
@@ -496,9 +538,9 @@ class DataFileUtil(object):
            download_web_file function. copy_file_path: copied file scratch
            area path) -> structure: parameter "copy_file_path" of String
         """
-        return self._client.call_method('DataFileUtil.download_web_file',
-                                        [params], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.download_web_file',
+                                    [params], self._service_ver, context)
 
     def status(self, context=None):
-        return self._client.call_method('DataFileUtil.status',
-                                        [], self._service_ver, context)
+        return self._client.run_job('DataFileUtil.status',
+                                    [], self._service_ver, context)
