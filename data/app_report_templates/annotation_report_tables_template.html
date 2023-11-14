@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>*TITLE*</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/datatables.min.css"/>
+</head>
+<body>
+
+<H3>"Annotate Plant Enzymes with OrthoFinder" Results</H3>
+
+<p> The table presented here shows the results of the "Annotate Plant
+Enzymes with OrthoFinder" App. In the output, all predicted enzymes in
+the KBaseGenome object provided by the user have been annotated with
+metabolic functions. The table provides the links between predicted
+enzymes in the KBase Genome and the curated Arabidopsis enzymes in the
+PlantSEED database. The columns of the table are explained as follows:
+<p>
+
+<ul>
+
+<li><b>Enzyme</b>: The text describing the metabolic activity of the
+enzyme.</li>
+
+<li><b>Curated Feature</b>: The Arabidopsis proteins that were curated
+to encode the corresponding enzyme. The table is organized so that
+each Arabidopsis protein has its own row.</li>
+
+<li><b>Predicted Ortholog</b>: The proteins in the input genome that
+were predicted to be orthologous to the corresponding Arabidopsis
+proteins, and therefore perform the same metabolic activity.</li>
+
+<li><b>Potential Orthologs</b>: The proteins from the same protein
+family. Each one is listed with the pairwise amino-acid sequence
+identity calculated for its alignment with the corresponding
+Arabidopsis protein. If the protein is red, that means it's linked to
+the corresponding ortholog in the same row. If the protein is blue, it
+means it is linked to an ortholog in a different row. If the protein
+is black, it has no predicted link.</li>
+
+</ul>
+
+<p>We list only protein identifiers in this table because OrthoFinder
+aligns protein sequences to find families. However, the App will
+annotate both the proteins and their parent genes</p>
+
+*TABLES*
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/datatables.min.js"></script>
+<script>
+    $(document).ready( function () {
+        $('.table').DataTable({
+			'dom': "<'row'<'col-sm-6'B><'col-sm-6'f>>t<'row'<'col-sm-4'i><'col-sm-8'p>>",
+            'buttons': ['copy', 'csv', 'print', 'colvis'],
+        });
+    } );
+</script>
+
+</body>
+</html>

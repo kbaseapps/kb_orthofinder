@@ -9,7 +9,6 @@ Test Protein Families manually put together and copied from:
 Files (will link from GitHub in due course):
 1) Arabidopsis_Family_Curation.txt
 scp seq:/homes/seaver/PlantSEED_Processing/Arabidopsis_Family_Curation.txt .
-(and reduced to two columns; will switch to sorted JSON in future)
 
 2) Ignored_Roles.txt
 scp branch:/homes/seaver/Projects/PlantSEED_GitHub/Scripts/PlantSEED_v3/KBase/Ignored_Roles.txt .
