@@ -7,7 +7,13 @@ import re
 PS_url = 'https://raw.githubusercontent.com/ModelSEED/PlantSEED/'
 PS_tag = 'kbase_release'
 
-# These should be retrieved from the Template data
+# These should be retrieved from the Template data.
+# `dy` = plastid stroma / thylakoid lumen transport (43 role occurrences on
+# ModelSEED/PlantSEED@dev as of 2026-08); missing here would silently drop
+# the compartment tag from those roles' function strings, defaulting them
+# to cytosol at reconstruction time. `y` (thylakoid lumen alone) added
+# defensively; not currently a single-letter localization key in
+# PlantSEED_Roles.json but will be if curation grows into it.
 Template_Compartment_Mapping={'c':'cytosol', 'g':'golgi', 'w':'cellwall',
                               'n':'nucleus', 'r':'endoplasm',
                               'v':'vacuole', 'cv':'vacuole',
@@ -15,7 +21,8 @@ Template_Compartment_Mapping={'c':'cytosol', 'g':'golgi', 'w':'cellwall',
                               'm':'mitochondria','cm':'mitochondria',
                               'mj':'mitointer', 'ce':'extracellular',
                               'x':'peroxisome', 'cx':'peroxisome',
-                              'e':'extracellular','de':'plastid'}
+                              'e':'extracellular','de':'plastid',
+                              'dy':'thylakoid', 'y':'thylakoid'}
 
 class FetchPlantSEEDImpl:
 
